@@ -1523,6 +1523,7 @@
     // ===== VOICE AGENT =====
     const FREE_TIME = 90; // seconds
     const AGENT_ID = 'agent_9901kh9myvt1erev441bspsn2wmx';
+    const TRIAL_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
     let sessionTimeout = null;
     let sessionActive = false;
     let conversation = null;
@@ -1532,6 +1533,33 @@
     const orbEl = document.getElementById('voice-orb');
     const overlayEl = document.getElementById('time-up-overlay');
     const dismissBtn = document.getElementById('time-up-dismiss');
+
+    // Check if free trial was already used (persists across refreshes)
+    function isTrialUsed() {
+      try {
+        const usedAt = localStorage.getItem('openclaw_trial_used');
+        if (!usedAt) return false;
+        return (Date.now() - parseInt(usedAt, 10)) < TRIAL_COOLDOWN_MS;
+      } catch { return false; }
+    }
+
+    function markTrialUsed() {
+      try { localStorage.setItem('openclaw_trial_used', Date.now().toString()); } catch {}
+    }
+
+    // If trial already used on page load, update the UI
+    if (isTrialUsed()) {
+      statusEl.textContent = 'Free session used — unlock 20 minutes for €8';
+    }
+
+    function handleStartClick() {
+      if (sessionActive) return;
+      if (isTrialUsed()) {
+        showTimeUp();
+        return;
+      }
+      startSession();
+    }
 
     async function startSession() {
       if (sessionActive) return;
@@ -1575,6 +1603,7 @@
         // End session after free time expires
         sessionTimeout = setTimeout(() => {
           endSession();
+          markTrialUsed();
           showTimeUp();
         }, FREE_TIME * 1000);
 
@@ -1612,38 +1641,30 @@
     function hideTimeUp() {
       overlayEl.classList.remove('visible');
       document.body.style.overflow = '';
-      statusEl.textContent = 'Click to start a new conversation';
       orbContainer.classList.remove('active', 'speaking');
       orbContainer.classList.add('idle');
       sessionActive = false;
+      statusEl.textContent = 'Free session used — unlock 20 minutes for €8';
     }
 
-    // Event listeners
-    orbEl.addEventListener('click', () => {
-      if (!sessionActive) {
-        startSession();
-      }
-    });
+    // Event listeners — all go through handleStartClick
+    orbEl.addEventListener('click', handleStartClick);
 
     orbEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (!sessionActive) startSession();
+        handleStartClick();
       }
     });
 
     document.getElementById('start-btn').addEventListener('click', () => {
       document.getElementById('voice-agent').scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        if (!sessionActive) startSession();
-      }, 600);
+      setTimeout(handleStartClick, 600);
     });
 
     document.getElementById('bottom-cta-btn').addEventListener('click', () => {
       document.getElementById('voice-agent').scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        if (!sessionActive) startSession();
-      }, 600);
+      setTimeout(handleStartClick, 600);
     });
 
     dismissBtn.addEventListener('click', hideTimeUp);
