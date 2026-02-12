@@ -1,4 +1,4 @@
-# SPEC.md — whatisopenclaw.com
+# SPEC.md — askopenclaw.com
 
 ## One-liner
 
@@ -23,7 +23,7 @@ You click it, you talk to a voice agent, it explains OpenClaw like a patient, kn
 
 ## Core Experience
 
-1. User lands on whatisopenclaw.com
+1. User lands on askopenclaw.com
 2. Sees a clean, minimal page with a brief tagline and a single call-to-action
 3. Clicks "Try it free" — an embedded ElevenLabs voice agent activates
 4. User asks questions in plain English, agent responds conversationally

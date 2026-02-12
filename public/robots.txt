@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://whatisopenclaw.com/sitemap.xml
+Sitemap: https://askopenclaw.com/sitemap.xml

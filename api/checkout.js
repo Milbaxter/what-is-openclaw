@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     const tokenId = crypto.randomBytes(6).toString('hex');
 
-    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || 'https://whatisopenclaw.com';
+    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || 'https://askopenclaw.com';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
