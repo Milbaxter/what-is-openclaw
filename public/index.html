@@ -496,6 +496,31 @@
       100% { transform: scale(1.06); }
     }
 
+    /* Speaking state — agent is responding */
+    .voice-orb-container.speaking .voice-ring:nth-child(1) {
+      animation: speak-ring 1.2s ease-in-out infinite;
+    }
+    .voice-orb-container.speaking .voice-ring:nth-child(2) {
+      animation: speak-ring 1.2s ease-in-out infinite 0.4s;
+    }
+    .voice-orb-container.speaking .voice-ring:nth-child(3) {
+      animation: speak-ring 1.2s ease-in-out infinite 0.8s;
+    }
+    .voice-orb-container.speaking .voice-orb {
+      animation: orb-speak 0.8s ease-in-out infinite alternate;
+      box-shadow: 0 8px 48px var(--primary-glow);
+    }
+
+    @keyframes speak-ring {
+      0%, 100% { transform: scale(0.85); opacity: 0.18; }
+      50% { transform: scale(1.05); opacity: 0.06; }
+    }
+
+    @keyframes orb-speak {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
     .voice-status {
       font-size: 1rem;
       color: var(--text-muted);
@@ -1461,10 +1486,9 @@
     </div>
   </div>
 
-  <!-- ElevenLabs Conversational AI Widget -->
-  <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+  <script type="module">
+    import { Conversation } from 'https://esm.sh/@elevenlabs/client';
 
-  <script>
     // ===== SCROLL REVEAL =====
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1481,7 +1505,6 @@
       btn.addEventListener('click', () => {
         const item = btn.parentElement;
         const isOpen = item.classList.contains('open');
-        const expanded = btn.getAttribute('aria-expanded') === 'true';
 
         // Close all others
         document.querySelectorAll('.faq-item.open').forEach(openItem => {
@@ -1502,7 +1525,7 @@
     const AGENT_ID = 'agent_9901kh9myvt1erev441bspsn2wmx';
     let sessionTimeout = null;
     let sessionActive = false;
-    let widgetEl = null;
+    let conversation = null;
 
     const statusEl = document.getElementById('voice-status');
     const orbContainer = document.getElementById('voice-orb-container');
@@ -1510,58 +1533,74 @@
     const overlayEl = document.getElementById('time-up-overlay');
     const dismissBtn = document.getElementById('time-up-dismiss');
 
-    function autoOpenWidget(el) {
-      // Try to click the widget's internal call button to auto-start the conversation
-      let attempts = 0;
-      const tryClick = setInterval(() => {
-        attempts++;
-        if (attempts > 20) { clearInterval(tryClick); return; }
-        const shadow = el.shadowRoot;
-        if (!shadow) return;
-        // Look for the call/start button inside the widget's shadow DOM
-        const btn = shadow.querySelector('button') || shadow.querySelector('[role="button"]');
-        if (btn) {
-          btn.click();
-          clearInterval(tryClick);
-        }
-      }, 300);
-    }
-
-    function startSession() {
+    async function startSession() {
       if (sessionActive) return;
       sessionActive = true;
 
       orbContainer.classList.remove('idle');
       orbContainer.classList.add('active');
-      statusEl.textContent = 'Conversation active — ask anything about OpenClaw';
+      statusEl.textContent = 'Connecting...';
 
-      // Create and inject the ElevenLabs widget
-      if (widgetEl) widgetEl.remove();
-      widgetEl = document.createElement('elevenlabs-convai');
-      widgetEl.setAttribute('agent-id', AGENT_ID);
-      document.body.appendChild(widgetEl);
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Auto-open the widget so the conversation starts immediately
-      autoOpenWidget(widgetEl);
+        conversation = await Conversation.startSession({
+          agentId: AGENT_ID,
+          onConnect: () => {
+            statusEl.textContent = 'Connected — start speaking';
+          },
+          onDisconnect: () => {
+            if (sessionActive) {
+              endSession();
+            }
+          },
+          onModeChange: ({ mode }) => {
+            orbContainer.classList.remove('speaking');
+            if (mode === 'speaking') {
+              orbContainer.classList.add('speaking');
+              statusEl.textContent = 'Expert is responding...';
+            } else {
+              statusEl.textContent = 'Listening — ask anything about OpenClaw';
+            }
+          },
+          onError: (error) => {
+            console.error('Conversation error:', error);
+            statusEl.textContent = 'Something went wrong. Click the orb to try again.';
+            sessionActive = false;
+            orbContainer.classList.remove('active', 'speaking');
+            orbContainer.classList.add('idle');
+          },
+        });
 
-      // End session after free time expires
-      sessionTimeout = setTimeout(() => {
-        endSession();
-        showTimeUp();
-      }, FREE_TIME * 1000);
+        // End session after free time expires
+        sessionTimeout = setTimeout(() => {
+          endSession();
+          showTimeUp();
+        }, FREE_TIME * 1000);
+
+      } catch (err) {
+        console.error('Failed to start session:', err);
+        sessionActive = false;
+        orbContainer.classList.remove('active');
+        orbContainer.classList.add('idle');
+        if (err.name === 'NotAllowedError') {
+          statusEl.textContent = 'Microphone access is required. Please allow it and try again.';
+        } else {
+          statusEl.textContent = 'Could not connect. Click the orb to try again.';
+        }
+      }
     }
 
-    function endSession() {
+    async function endSession() {
       sessionActive = false;
       clearTimeout(sessionTimeout);
-      orbContainer.classList.remove('active');
+      orbContainer.classList.remove('active', 'speaking');
       orbContainer.classList.add('idle');
       statusEl.textContent = 'Session ended';
 
-      // Remove the ElevenLabs widget to stop the conversation
-      if (widgetEl) {
-        widgetEl.remove();
-        widgetEl = null;
+      if (conversation) {
+        await conversation.endSession();
+        conversation = null;
       }
     }
 
@@ -1574,7 +1613,7 @@
       overlayEl.classList.remove('visible');
       document.body.style.overflow = '';
       statusEl.textContent = 'Click to start a new conversation';
-      orbContainer.classList.remove('active');
+      orbContainer.classList.remove('active', 'speaking');
       orbContainer.classList.add('idle');
       sessionActive = false;
     }
@@ -1629,7 +1668,8 @@
     });
 
     // ===== STRIPE CHECKOUT =====
-    async function startCheckout() {
+    // Exposed globally for onclick handlers in HTML
+    window.startCheckout = async function() {
       try {
         const btn = document.getElementById('pricing-pay-btn');
         const originalText = btn.textContent;
@@ -1650,7 +1690,7 @@
         console.error('Checkout error:', err);
         alert('Something went wrong. Please try again.');
       }
-    }
+    };
   </script>
 
 </body>

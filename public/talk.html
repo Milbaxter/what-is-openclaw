@@ -192,24 +192,6 @@
 
     .btn-link:hover { text-decoration: underline; }
 
-    /* Connected state */
-    .connected-label {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .widget-container {
-      width: 100%;
-      min-height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 24px;
-    }
-
     .session-info {
       font-size: 0.95rem;
       color: var(--text-muted);
@@ -303,33 +285,152 @@
       color: var(--text-muted);
     }
 
-    /* Make the ElevenLabs widget large and centered on this page */
-    elevenlabs-convai {
-      position: fixed !important;
-      bottom: auto !important;
-      right: auto !important;
-      top: 50% !important;
-      left: 50% !important;
-      transform: translate(-50%, -50%) scale(1.8) !important;
-      z-index: 1000 !important;
+    /* Voice orb */
+    .voice-orb-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
     }
 
-    .widget-hint {
-      margin-top: 40px;
-      font-size: 1rem;
+    .voice-orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, rgba(244, 162, 97, 1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 24px var(--primary-glow);
+      position: relative;
+      z-index: 2;
+    }
+
+    .voice-orb svg {
+      width: 40px;
+      height: 40px;
+      color: #fff;
+    }
+
+    .voice-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      opacity: 0;
+      z-index: 1;
+    }
+
+    /* Idle — gentle breathing */
+    .voice-orb-container.idle .voice-ring:nth-child(1) {
+      animation: breathe 4s ease-in-out infinite;
+    }
+    .voice-orb-container.idle .voice-ring:nth-child(2) {
+      animation: breathe 4s ease-in-out infinite 1.3s;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.7); opacity: 0; }
+      50% { transform: scale(0.85); opacity: 0.12; }
+    }
+
+    /* Active / listening */
+    .voice-orb-container.active .voice-ring:nth-child(1) {
+      animation: sonar 2s ease-out infinite;
+    }
+    .voice-orb-container.active .voice-ring:nth-child(2) {
+      animation: sonar 2s ease-out infinite 0.6s;
+    }
+    .voice-orb-container.active .voice-ring:nth-child(3) {
+      animation: sonar 2s ease-out infinite 1.2s;
+    }
+    .voice-orb-container.active .voice-orb {
+      animation: orb-pulse 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes sonar {
+      0% { transform: scale(0.7); opacity: 0.35; }
+      100% { transform: scale(1.3); opacity: 0; }
+    }
+
+    @keyframes orb-pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.06); }
+    }
+
+    /* Speaking — agent is responding */
+    .voice-orb-container.speaking .voice-ring:nth-child(1) {
+      animation: speak-ring 1.2s ease-in-out infinite;
+    }
+    .voice-orb-container.speaking .voice-ring:nth-child(2) {
+      animation: speak-ring 1.2s ease-in-out infinite 0.4s;
+    }
+    .voice-orb-container.speaking .voice-ring:nth-child(3) {
+      animation: speak-ring 1.2s ease-in-out infinite 0.8s;
+    }
+    .voice-orb-container.speaking .voice-orb {
+      animation: orb-speak 0.8s ease-in-out infinite alternate;
+      box-shadow: 0 8px 48px var(--primary-glow);
+    }
+
+    @keyframes speak-ring {
+      0%, 100% { transform: scale(0.85); opacity: 0.18; }
+      50% { transform: scale(1.05); opacity: 0.06; }
+    }
+
+    @keyframes orb-speak {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    /* Transcript */
+    .transcript {
+      width: 100%;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .transcript:empty {
+      display: none;
+    }
+
+    .transcript-msg {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      max-width: 90%;
+    }
+
+    .transcript-agent {
+      background: var(--bg-warm);
+      color: var(--text);
+      align-self: flex-start;
+    }
+
+    .transcript-user {
+      background: var(--primary-light);
+      color: var(--text);
+      align-self: flex-end;
+    }
+
+    .transcript-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
       color: var(--text-muted);
-      animation: fade-pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes fade-pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    .widget-hint .arrow {
-      display: inline-block;
-      font-size: 1.4rem;
-      margin-right: 6px;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     @media (max-width: 600px) {
@@ -339,8 +440,17 @@
       .main {
         padding: 20px;
       }
-      elevenlabs-convai {
-        transform: translate(-50%, -50%) scale(1.4) !important;
+      .voice-orb-container {
+        width: 140px;
+        height: 140px;
+      }
+      .voice-orb {
+        width: 96px;
+        height: 96px;
+      }
+      .voice-orb svg {
+        width: 32px;
+        height: 32px;
       }
     }
   </style>
@@ -374,9 +484,16 @@
 
     <!-- Connected state -->
     <div class="state" id="state-connected">
-      <p class="connected-label">Session ready</p>
-      <p class="session-info" style="margin-bottom: 8px;">Click the microphone to start talking. Ask anything about OpenClaw.</p>
-      <p class="widget-hint"><span class="arrow">&#128071;</span> Tap the orb to begin</p>
+      <div class="voice-orb-container idle" id="talk-orb-container">
+        <div class="voice-ring"></div>
+        <div class="voice-ring"></div>
+        <div class="voice-ring"></div>
+        <div class="voice-orb">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+      </div>
+      <p class="session-info" id="session-status">Listening — ask anything about OpenClaw</p>
+      <div class="transcript" id="transcript"></div>
     </div>
 
     <!-- Session ended (has time remaining) -->
@@ -405,10 +522,9 @@
     <a href="/">askopenclaw.com</a> &middot; Voice by <a href="https://elevenlabs.io" target="_blank" rel="noopener">ElevenLabs</a>
   </div>
 
-  <!-- ElevenLabs Widget -->
-  <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+  <script type="module">
+    import { Conversation } from 'https://esm.sh/@elevenlabs/client';
 
-  <script>
     // Extract token from URL path: /talk/abc123
     const pathParts = window.location.pathname.split('/');
     const token = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
@@ -416,7 +532,7 @@
     let sessionStartTime = null;
     let timerInterval = null;
     let remainingSeconds = 0;
-    let widgetElement = null;
+    let conversation = null;
 
     // State management
     function showState(stateId) {
@@ -483,7 +599,7 @@
       }
     }
 
-    // Start session: call API, get signed URL, load widget
+    // Start session: call API, get signed URL, connect via SDK
     async function startSession() {
       showState('state-loading');
 
@@ -506,63 +622,79 @@
 
         remainingSeconds = data.remaining;
 
-        // Create and insert the ElevenLabs widget with signed URL
-        loadWidget(data.signed_url);
+        // Clear previous transcript
+        const transcript = document.getElementById('transcript');
+        if (transcript) transcript.innerHTML = '';
+
+        await connectAgent(data.signed_url);
         showState('state-connected');
         startLocalTimer();
 
       } catch (err) {
         console.error('Session start error:', err);
-        showError('Connection error', 'Please check your internet connection and try again.');
-      }
-    }
-
-    function loadWidget(signedUrl) {
-      // Remove any existing widget
-      if (widgetElement) {
-        widgetElement.remove();
-        widgetElement = null;
-      }
-
-      // Create the ElevenLabs widget element
-      widgetElement = document.createElement('elevenlabs-convai');
-      widgetElement.setAttribute('agent-id', 'agent_1201kh9xdfchfvdv523760rknp1r');
-
-      // Append to body so it renders as a floating widget (centered via CSS)
-      document.body.appendChild(widgetElement);
-
-      // Try to auto-start the conversation after widget loads
-      setTimeout(() => {
-        try {
-          const shadow = widgetElement.shadowRoot;
-          if (shadow) {
-            const btn = shadow.querySelector('button');
-            if (btn) btn.click();
-          }
-        } catch (e) {
-          // Auto-start blocked by browser — user will click manually
+        if (err.name === 'NotAllowedError') {
+          showError('Microphone required', 'Please allow microphone access and reload the page.');
+        } else {
+          showError('Connection error', 'Please check your internet connection and try again.');
         }
-      }, 1500);
-
-      // Listen for widget disconnect events
-      listenForDisconnect();
+      }
     }
 
-    function listenForDisconnect() {
-      // Method 1: Listen for widget custom events
-      if (widgetElement) {
-        widgetElement.addEventListener('elevenlabs-convai:call-ended', () => {
-          endSession();
-        });
-        widgetElement.addEventListener('elevenlabs-convai:disconnect', () => {
-          endSession();
-        });
-      }
+    async function connectAgent(signedUrl) {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Method 2: beforeunload — end session when user leaves/closes tab
-      window.addEventListener('beforeunload', () => {
-        navigator.sendBeacon(`/api/end?token=${encodeURIComponent(token)}`, '');
+      const orbContainer = document.getElementById('talk-orb-container');
+      const statusEl = document.getElementById('session-status');
+
+      conversation = await Conversation.startSession({
+        signedUrl: signedUrl,
+        onConnect: () => {
+          if (orbContainer) {
+            orbContainer.classList.remove('idle');
+            orbContainer.classList.add('active');
+          }
+          if (statusEl) statusEl.textContent = 'Connected — start speaking';
+        },
+        onDisconnect: () => {
+          endSession();
+        },
+        onModeChange: ({ mode }) => {
+          if (!orbContainer) return;
+          orbContainer.classList.remove('speaking');
+          if (mode === 'speaking') {
+            orbContainer.classList.add('speaking');
+            if (statusEl) statusEl.textContent = 'Expert is responding...';
+          } else {
+            if (statusEl) statusEl.textContent = 'Listening — ask anything about OpenClaw';
+          }
+        },
+        onMessage: ({ message, source }) => {
+          addTranscriptMessage(message, source);
+        },
+        onError: (error) => {
+          console.error('Conversation error:', error);
+        },
       });
+    }
+
+    function addTranscriptMessage(text, source) {
+      const transcript = document.getElementById('transcript');
+      if (!transcript || !text.trim()) return;
+
+      const msg = document.createElement('div');
+      msg.className = 'transcript-msg ' + (source === 'ai' ? 'transcript-agent' : 'transcript-user');
+
+      const label = document.createElement('span');
+      label.className = 'transcript-label';
+      label.textContent = source === 'ai' ? 'Expert' : 'You';
+
+      const content = document.createElement('span');
+      content.textContent = text;
+
+      msg.appendChild(label);
+      msg.appendChild(content);
+      transcript.appendChild(msg);
+      transcript.scrollTop = transcript.scrollHeight;
     }
 
     async function endSession() {
@@ -574,10 +706,15 @@
 
       stopLocalTimer();
 
-      // Remove widget
-      if (widgetElement) {
-        widgetElement.remove();
-        widgetElement = null;
+      const orbContainer = document.getElementById('talk-orb-container');
+      if (orbContainer) {
+        orbContainer.classList.remove('active', 'speaking');
+        orbContainer.classList.add('idle');
+      }
+
+      if (conversation) {
+        await conversation.endSession();
+        conversation = null;
       }
 
       try {
@@ -609,6 +746,11 @@
       document.getElementById('error-msg').textContent = message;
       showState('state-error');
     }
+
+    // End session when user leaves/closes tab
+    window.addEventListener('beforeunload', () => {
+      navigator.sendBeacon(`/api/end?token=${encodeURIComponent(token)}`, '');
+    });
 
     // Restart button
     document.getElementById('restart-btn').addEventListener('click', () => {
