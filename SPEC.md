@@ -74,7 +74,7 @@ The ElevenLabs agent is grounded in curated knowledge covering:
 | Tier | What you get | Price |
 |------|-------------|-------|
 | **Free** | 90-second conversation on the website | $0 |
-| **Full session** | 20-minute conversation via dedicated ElevenLabs agent link | TBD (e.g. $2-5) |
+| **Full session** | 20-minute conversation via dedicated ElevenLabs agent link | €6 (€0.30/min × 20min) |
 
 ### Flow
 
@@ -130,7 +130,7 @@ Everything else is v2.
 - [x] Voice provider → ElevenLabs
 - [x] Accounts → No, anonymous
 - [x] Payment → Stripe Payment Link, manual fulfillment
-- [ ] Exact price point for paid tier
+- [x] Exact price point for paid tier → €6 (€0.30/min, 3x cost of €0.10/min)
 - [ ] ElevenLabs agent configuration (voice, model, knowledge base)
 - [ ] Legal: trademark considerations with "OpenClaw" in the domain/branding
 - [ ] How to handle knowledge base updates as OpenClaw evolves
