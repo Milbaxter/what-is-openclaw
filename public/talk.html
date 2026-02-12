@@ -492,13 +492,13 @@
       }
 
       // Create the ElevenLabs widget element
+      // Use agent-id for widget rendering (server already validated the token)
       widgetElement = document.createElement('elevenlabs-convai');
-      widgetElement.setAttribute('signed-url', signedUrl);
+      widgetElement.setAttribute('agent-id', 'agent_9901kh9myvt1erev441bspsn2wmx');
 
       document.getElementById('widget-container').appendChild(widgetElement);
 
       // Listen for widget disconnect events
-      // The widget fires custom events when the conversation ends
       listenForDisconnect();
     }
 
