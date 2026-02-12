@@ -302,12 +302,44 @@
       color: var(--text-muted);
     }
 
+    /* Make the ElevenLabs widget large and centered on this page */
+    elevenlabs-convai {
+      position: fixed !important;
+      bottom: auto !important;
+      right: auto !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) scale(1.8) !important;
+      z-index: 1000 !important;
+    }
+
+    .widget-hint {
+      margin-top: 40px;
+      font-size: 1rem;
+      color: var(--text-muted);
+      animation: fade-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes fade-pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .widget-hint .arrow {
+      display: inline-block;
+      font-size: 1.4rem;
+      margin-right: 6px;
+    }
+
     @media (max-width: 600px) {
       .header {
         padding: 16px 20px;
       }
       .main {
         padding: 20px;
+      }
+      elevenlabs-convai {
+        transform: translate(-50%, -50%) scale(1.4) !important;
       }
     }
   </style>
@@ -341,9 +373,9 @@
 
     <!-- Connected state -->
     <div class="state" id="state-connected">
-      <p class="connected-label">Session active</p>
-      <div class="widget-container" id="widget-container"></div>
-      <p class="session-info">Ask anything about OpenClaw. Your time is tracked on our server.</p>
+      <p class="connected-label">Session ready</p>
+      <p class="session-info" style="margin-bottom: 8px;">Click the microphone to start talking. Ask anything about OpenClaw.</p>
+      <p class="widget-hint"><span class="arrow">&#128071;</span> Tap the orb to begin</p>
     </div>
 
     <!-- Session ended (has time remaining) -->
@@ -492,11 +524,24 @@
       }
 
       // Create the ElevenLabs widget element
-      // Use agent-id for widget rendering (server already validated the token)
       widgetElement = document.createElement('elevenlabs-convai');
       widgetElement.setAttribute('agent-id', 'agent_1201kh9xdfchfvdv523760rknp1r');
 
-      document.getElementById('widget-container').appendChild(widgetElement);
+      // Append to body so it renders as a floating widget (centered via CSS)
+      document.body.appendChild(widgetElement);
+
+      // Try to auto-start the conversation after widget loads
+      setTimeout(() => {
+        try {
+          const shadow = widgetElement.shadowRoot;
+          if (shadow) {
+            const btn = shadow.querySelector('button');
+            if (btn) btn.click();
+          }
+        } catch (e) {
+          // Auto-start blocked by browser — user will click manually
+        }
+      }, 1500);
 
       // Listen for widget disconnect events
       listenForDisconnect();
@@ -508,27 +553,13 @@
         widgetElement.addEventListener('elevenlabs-convai:call-ended', () => {
           endSession();
         });
-
-        // Also try the generic disconnect event
         widgetElement.addEventListener('elevenlabs-convai:disconnect', () => {
           endSession();
         });
       }
 
-      // Method 2: MutationObserver to detect widget state changes
-      const container = document.getElementById('widget-container');
-      const observer = new MutationObserver(() => {
-        // Check if widget has been removed or changed state
-        if (container && !container.querySelector('elevenlabs-convai')) {
-          endSession();
-        }
-      });
-
-      observer.observe(container, { childList: true, subtree: true });
-
-      // Method 3: beforeunload — end session when user leaves
+      // Method 2: beforeunload — end session when user leaves/closes tab
       window.addEventListener('beforeunload', () => {
-        // Use sendBeacon for reliable delivery
         navigator.sendBeacon(`/api/end?token=${encodeURIComponent(token)}`, '');
       });
     }
