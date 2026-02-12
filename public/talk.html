@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Session — What is OpenClaw?</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #faf7f4;
+      --bg-warm: #f5efe9;
+      --text: #2a2420;
+      --text-muted: #7a706a;
+      --primary: #e8604c;
+      --primary-dark: #d44f3c;
+      --primary-light: #fbeae7;
+      --primary-glow: rgba(232, 96, 76, 0.25);
+      --surface: #ffffff;
+      --border: #e8e2dc;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --green: #22c55e;
+      --green-light: #dcfce7;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+      font-size: 1.2rem;
+      line-height: 1.75;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.018;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    h1, h2, h3 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-weight: 400;
+      line-height: 1.15;
+    }
+
+    /* Header */
+    .header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo span { font-size: 1.4rem; }
+
+    .time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-family: 'Newsreader', serif;
+      padding: 8px 18px;
+      border-radius: 100px;
+      background: var(--green-light);
+      color: #166534;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .time-badge.warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .time-badge.critical {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      animation: pulse-badge 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .time-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .time-badge.warning .dot { background: #f59e0b; }
+    .time-badge.critical .dot { background: var(--primary); }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* States */
+    .state {
+      display: none;
+      text-align: center;
+      width: 100%;
+    }
+
+    .state.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Loading */
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error */
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .error-title {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .error-msg {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .btn-link {
+      color: var(--primary);
+      font-size: 1rem;
+      text-decoration: none;
+    }
+
+    .btn-link:hover { text-decoration: underline; }
+
+    /* Connected state */
+    .connected-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .widget-container {
+      width: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .session-info {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    /* Ended state */
+    .ended-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .ended-title {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .ended-msg {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Newsreader', serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      padding: 16px 36px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 24px var(--primary-glow);
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Newsreader', serif;
+      font-size: 1rem;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: none;
+      padding: 12px 28px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      margin-top: 12px;
+    }
+
+    .btn-secondary:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer a:hover { color: var(--primary); }
+
+    /* Depleted state */
+    .depleted-stats {
+      background: var(--bg-warm);
+      border-radius: var(--radius-sm);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 16px 20px;
+      }
+      .main {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="/" class="nav-logo">
+      <span>&#129438;</span> What is OpenClaw?
+    </a>
+    <div class="time-badge" id="time-badge" style="display: none;">
+      <span class="dot"></span>
+      <span id="time-display">20:00</span> remaining
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Loading state -->
+    <div class="state active" id="state-loading">
+      <div class="spinner"></div>
+      <p style="color: var(--text-muted); font-size: 1rem;">Starting your session...</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="state" id="state-error">
+      <div class="error-icon">&#129438;</div>
+      <h2 class="error-title" id="error-title">Something went wrong</h2>
+      <p class="error-msg" id="error-msg">We couldn't start your session.</p>
+      <a href="/" class="btn-link">Back to homepage</a>
+    </div>
+
+    <!-- Connected state -->
+    <div class="state" id="state-connected">
+      <p class="connected-label">Session active</p>
+      <div class="widget-container" id="widget-container"></div>
+      <p class="session-info">Ask anything about OpenClaw. Your time is tracked on our server.</p>
+    </div>
+
+    <!-- Session ended (has time remaining) -->
+    <div class="state" id="state-ended">
+      <div class="ended-icon">&#9989;</div>
+      <h2 class="ended-title">Session paused</h2>
+      <p class="ended-msg">You have <strong id="remaining-display">--</strong> remaining. Come back anytime with this same link.</p>
+      <button class="btn-primary" id="restart-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        Continue talking
+      </button>
+      <a href="/" class="btn-secondary">Back to homepage</a>
+    </div>
+
+    <!-- Time depleted -->
+    <div class="state" id="state-depleted">
+      <div class="ended-icon">&#129438;</div>
+      <h2 class="ended-title">Time's up!</h2>
+      <p class="ended-msg">You've used all 20 minutes of your session. We hope you learned a lot about OpenClaw!</p>
+      <a href="/#pricing" class="btn-primary">Get another session</a>
+      <a href="/" class="btn-secondary">Back to homepage</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="/">whatisopenclaw.com</a> &middot; Voice by <a href="https://elevenlabs.io" target="_blank" rel="noopener">ElevenLabs</a>
+  </div>
+
+  <!-- ElevenLabs Widget -->
+  <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+
+  <script>
+    // Extract token from URL path: /talk/abc123
+    const pathParts = window.location.pathname.split('/');
+    const token = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+
+    let sessionStartTime = null;
+    let timerInterval = null;
+    let remainingSeconds = 0;
+    let widgetElement = null;
+
+    // State management
+    function showState(stateId) {
+      document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+      document.getElementById(stateId).classList.add('active');
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m + ':' + String(s).padStart(2, '0');
+    }
+
+    function updateTimeBadge() {
+      const badge = document.getElementById('time-badge');
+      const display = document.getElementById('time-display');
+
+      if (remainingSeconds <= 0) {
+        badge.style.display = 'none';
+        return;
+      }
+
+      badge.style.display = 'inline-flex';
+      display.textContent = formatTime(remainingSeconds);
+
+      badge.classList.remove('warning', 'critical');
+      if (remainingSeconds <= 60) {
+        badge.classList.add('critical');
+      } else if (remainingSeconds <= 180) {
+        badge.classList.add('warning');
+      }
+    }
+
+    function startLocalTimer() {
+      sessionStartTime = Date.now();
+      updateTimeBadge();
+
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+        const displayRemaining = Math.max(0, remainingSeconds - elapsed);
+
+        const display = document.getElementById('time-display');
+        const badge = document.getElementById('time-badge');
+        display.textContent = formatTime(displayRemaining);
+
+        badge.classList.remove('warning', 'critical');
+        if (displayRemaining <= 60) {
+          badge.classList.add('critical');
+        } else if (displayRemaining <= 180) {
+          badge.classList.add('warning');
+        }
+
+        // Auto-end if local timer hits zero
+        if (displayRemaining <= 0) {
+          endSession();
+        }
+      }, 1000);
+    }
+
+    function stopLocalTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // Start session: call API, get signed URL, load widget
+    async function startSession() {
+      showState('state-loading');
+
+      try {
+        const res = await fetch(`/api/session?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (res.status === 404) {
+            showError('Session not found', 'This link may be invalid or the payment is still processing. Try again in a moment.');
+          } else if (res.status === 403) {
+            showState('state-depleted');
+          } else if (res.status === 409) {
+            showError('Session in use', 'This session is active on another device. Please close it there first, or wait up to 30 minutes for it to auto-expire.');
+          } else {
+            showError('Something went wrong', data.error || 'Please try again.');
+          }
+          return;
+        }
+
+        remainingSeconds = data.remaining;
+
+        // Create and insert the ElevenLabs widget with signed URL
+        loadWidget(data.signed_url);
+        showState('state-connected');
+        startLocalTimer();
+
+      } catch (err) {
+        console.error('Session start error:', err);
+        showError('Connection error', 'Please check your internet connection and try again.');
+      }
+    }
+
+    function loadWidget(signedUrl) {
+      // Remove any existing widget
+      if (widgetElement) {
+        widgetElement.remove();
+        widgetElement = null;
+      }
+
+      // Create the ElevenLabs widget element
+      widgetElement = document.createElement('elevenlabs-convai');
+      widgetElement.setAttribute('signed-url', signedUrl);
+
+      document.getElementById('widget-container').appendChild(widgetElement);
+
+      // Listen for widget disconnect events
+      // The widget fires custom events when the conversation ends
+      listenForDisconnect();
+    }
+
+    function listenForDisconnect() {
+      // Method 1: Listen for widget custom events
+      if (widgetElement) {
+        widgetElement.addEventListener('elevenlabs-convai:call-ended', () => {
+          endSession();
+        });
+
+        // Also try the generic disconnect event
+        widgetElement.addEventListener('elevenlabs-convai:disconnect', () => {
+          endSession();
+        });
+      }
+
+      // Method 2: MutationObserver to detect widget state changes
+      const container = document.getElementById('widget-container');
+      const observer = new MutationObserver(() => {
+        // Check if widget has been removed or changed state
+        if (container && !container.querySelector('elevenlabs-convai')) {
+          endSession();
+        }
+      });
+
+      observer.observe(container, { childList: true, subtree: true });
+
+      // Method 3: beforeunload — end session when user leaves
+      window.addEventListener('beforeunload', () => {
+        // Use sendBeacon for reliable delivery
+        navigator.sendBeacon(`/api/end?token=${encodeURIComponent(token)}`, '');
+      });
+    }
+
+    async function endSession() {
+      // Prevent double-ending
+      if (document.getElementById('state-ended').classList.contains('active') ||
+          document.getElementById('state-depleted').classList.contains('active')) {
+        return;
+      }
+
+      stopLocalTimer();
+
+      // Remove widget
+      if (widgetElement) {
+        widgetElement.remove();
+        widgetElement = null;
+      }
+
+      try {
+        const res = await fetch(`/api/end?token=${encodeURIComponent(token)}`, {
+          method: 'POST',
+        });
+        const data = await res.json();
+
+        remainingSeconds = data.remaining;
+
+        if (remainingSeconds <= 0) {
+          showState('state-depleted');
+          document.getElementById('time-badge').style.display = 'none';
+        } else {
+          document.getElementById('remaining-display').textContent = formatTime(remainingSeconds);
+          showState('state-ended');
+          updateTimeBadge();
+        }
+      } catch (err) {
+        console.error('End session error:', err);
+        // Show ended state anyway — server will auto-expire
+        showState('state-ended');
+        document.getElementById('remaining-display').textContent = 'some time';
+      }
+    }
+
+    function showError(title, message) {
+      document.getElementById('error-title').textContent = title;
+      document.getElementById('error-msg').textContent = message;
+      showState('state-error');
+    }
+
+    // Restart button
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      startSession();
+    });
+
+    // Validate token and start
+    if (!token || !/^[a-f0-9]{12}$/.test(token)) {
+      showError('Invalid link', 'This session link appears to be invalid. Please check the URL.');
+    } else {
+      startSession();
+    }
+  </script>
+
+</body>
+</html>
