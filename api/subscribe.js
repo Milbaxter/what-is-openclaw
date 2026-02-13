@@ -1,0 +1,98 @@
+export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { email } = req.body;
+
+    // Basic email validation
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email required' });
+    }
+
+    const emailLower = email.toLowerCase().trim();
+
+    // TODO: Choose your email service provider and uncomment the relevant section below
+
+    // ===== OPTION 1: ConvertKit (Recommended) =====
+    // const CONVERTKIT_API_KEY = process.env.CONVERTKIT_API_KEY;
+    // const CONVERTKIT_FORM_ID = process.env.CONVERTKIT_FORM_ID;
+    // 
+    // const response = await fetch(`https://api.convertkit.com/v3/forms/${CONVERTKIT_FORM_ID}/subscribe`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     api_key: CONVERTKIT_API_KEY,
+    //     email: emailLower
+    //   })
+    // });
+    // 
+    // if (!response.ok) {
+    //   throw new Error('ConvertKit API error');
+    // }
+
+    // ===== OPTION 2: Resend (Modern, developer-friendly) =====
+    // import { Resend } from 'resend';
+    // const resend = new Resend(process.env.RESEND_API_KEY);
+    // 
+    // await resend.contacts.create({
+    //   email: emailLower,
+    //   audienceId: process.env.RESEND_AUDIENCE_ID
+    // });
+
+    // ===== OPTION 3: Mailchimp =====
+    // const MAILCHIMP_API_KEY = process.env.MAILCHIMP_API_KEY;
+    // const MAILCHIMP_SERVER = process.env.MAILCHIMP_SERVER; // e.g., 'us1'
+    // const MAILCHIMP_LIST_ID = process.env.MAILCHIMP_LIST_ID;
+    // 
+    // const response = await fetch(
+    //   `https://${MAILCHIMP_SERVER}.api.mailchimp.com/3.0/lists/${MAILCHIMP_LIST_ID}/members`,
+    //   {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: `Bearer ${MAILCHIMP_API_KEY}`
+    //     },
+    //     body: JSON.stringify({
+    //       email_address: emailLower,
+    //       status: 'subscribed'
+    //     })
+    //   }
+    // );
+    // 
+    // if (!response.ok) {
+    //   const error = await response.json();
+    //   if (error.title === 'Member Exists') {
+    //     return res.status(200).json({ success: true, message: 'Already subscribed' });
+    //   }
+    //   throw new Error('Mailchimp API error');
+    // }
+
+    // ===== TEMPORARY: Log to console (for testing) =====
+    console.log('📧 New email subscription:', emailLower);
+    
+    // For now, just log it and return success
+    // TODO: Wire up to your preferred email service above
+    
+    return res.status(200).json({ 
+      success: true,
+      message: 'Subscribed successfully'
+    });
+
+  } catch (err) {
+    console.error('Subscribe error:', err);
+    return res.status(500).json({ 
+      error: 'Failed to subscribe. Please try again.' 
+    });
+  }
+}

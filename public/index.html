@@ -1035,6 +1035,103 @@
       text-decoration-color: var(--primary);
     }
 
+    /* ---- EMAIL CAPTURE ---- */
+    .email-capture {
+      background: linear-gradient(135deg, #f8f6f3 0%, #fff 100%);
+      padding: 60px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .email-capture-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .email-capture h3 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .email-capture p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 1rem;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: #fff;
+    }
+
+    .email-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .email-submit {
+      padding: 14px 28px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .email-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
+    }
+
+    .email-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .email-message {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      min-height: 24px;
+    }
+
+    .email-message.success {
+      color: #059669;
+    }
+
+    .email-message.error {
+      color: #dc2626;
+    }
+
+    @media (max-width: 640px) {
+      .email-form {
+        flex-direction: column;
+      }
+
+      .email-submit {
+        width: 100%;
+      }
+    }
+
     /* ---- TIME-UP OVERLAY ---- */
     .time-up-overlay {
       position: fixed;
@@ -1630,6 +1727,28 @@
     </div>
   </section>
 
+  <!-- ===== EMAIL CAPTURE ===== -->
+  <section class="email-capture">
+    <div class="email-capture-inner">
+      <h3>Stay Updated on OpenClaw</h3>
+      <p>Get notified when we add new insights, deployment guides, and expert analyses. No spam, just value.</p>
+      <form class="email-form" id="email-capture-form" onsubmit="handleEmailSubmit(event)">
+        <input 
+          type="email" 
+          class="email-input" 
+          id="email-input"
+          placeholder="your@email.com" 
+          required
+          aria-label="Email address"
+        >
+        <button type="submit" class="email-submit" id="email-submit-btn">
+          Subscribe
+        </button>
+      </form>
+      <div class="email-message" id="email-message" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
   <!-- ===== FOOTER ===== -->
   <footer>
     <div class="container">
@@ -1885,6 +2004,58 @@
       } catch (err) {
         console.error('Checkout error:', err);
         alert('Something went wrong. Please try again.');
+      }
+    };
+
+    // ===== EMAIL CAPTURE =====
+    window.handleEmailSubmit = async function(event) {
+      event.preventDefault();
+      
+      const input = document.getElementById('email-input');
+      const button = document.getElementById('email-submit-btn');
+      const message = document.getElementById('email-message');
+      const email = input.value.trim();
+
+      if (!email) return;
+
+      // Update UI
+      button.disabled = true;
+      button.textContent = 'Subscribing...';
+      message.textContent = '';
+      message.className = 'email-message';
+
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          message.textContent = '✓ Thanks! You\'re subscribed.';
+          message.className = 'email-message success';
+          input.value = '';
+          
+          // Track event (if you have analytics)
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'email_capture', {
+              event_category: 'engagement',
+              event_label: 'newsletter_signup'
+            });
+          }
+        } else {
+          message.textContent = data.error || 'Something went wrong. Please try again.';
+          message.className = 'email-message error';
+        }
+      } catch (err) {
+        console.error('Email capture error:', err);
+        message.textContent = 'Network error. Please try again.';
+        message.className = 'email-message error';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Subscribe';
       }
     };
   </script>
