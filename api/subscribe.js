@@ -78,11 +78,24 @@ export default async function handler(req, res) {
     //   throw new Error('Mailchimp API error');
     // }
 
-    // ===== TEMPORARY: Log to console (for testing) =====
-    console.log('📧 New email subscription:', emailLower);
+    // ===== FILE STORAGE: Save to emails.json =====
+    // NOTE: Vercel serverless functions can't write to local files.
+    // Using structured logging instead - emails can be exported from Vercel logs
     
-    // For now, just log it and return success
-    // TODO: Wire up to your preferred email service above
+    const timestamp = new Date().toISOString();
+    const emailData = {
+      email: emailLower,
+      timestamp,
+      source: 'askopenclaw.com',
+      userAgent: req.headers['user-agent'],
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    };
+    
+    // Structured log for easy parsing/export from Vercel
+    console.log('EMAIL_SUBSCRIPTION:', JSON.stringify(emailData));
+    
+    // Also log in human-readable format
+    console.log(`📧 New subscriber: ${emailLower} at ${timestamp}`);
     
     return res.status(200).json({ 
       success: true,
