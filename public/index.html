@@ -99,6 +99,30 @@
           "@type": "Answer",
           "text": "Start with the basics: run it in an isolated environment (Docker, dedicated VM), restrict network access, audit all third-party skills, rotate API keys regularly, and monitor logs for unusual activity. For enterprise, consider a reverse proxy with authentication, skill allowlisting, and input/output filtering for prompt injection."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "Why are businesses paying attention to OpenClaw?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OpenClaw went from 9,000 to 100,000+ GitHub stars in a single week. Businesses started deploying it for its self-hosted AI assistant that connects to Slack, Teams, WhatsApp, and more — with full data ownership, no per-seat licensing, and limitless customization through its skills system."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the top real-world use cases for OpenClaw?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Customer support on WhatsApp/Telegram, internal knowledge assistants on Slack connected to company docs, lead qualification via webchat, content and copywriting pipelines for marketing teams, and DevOps on-call bots that let team members query system status from Slack or Discord."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When is OpenClaw NOT the right choice?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Don't use OpenClaw if you need SOC 2 compliance out of the box, if your team doesn't have anyone comfortable with a command line, if you need enterprise-grade SLAs, or if you're handling highly regulated data (healthcare, finance) without a dedicated security team. In those cases, ChatGPT Enterprise or a purpose-built enterprise AI platform is the safer bet."
+        }
       }
     ]
   }
@@ -906,48 +930,6 @@
       line-height: 1.7;
     }
 
-    /* ---- SEO CONTENT ---- */
-    .seo-content {
-      padding: 100px 24px;
-    }
-
-    .seo-content h2 {
-      text-align: center;
-      font-size: clamp(1.8rem, 4vw, 2.5rem);
-      margin-bottom: 48px;
-    }
-
-    .seo-article h3 {
-      font-size: 1.4rem;
-      margin: 40px 0 12px;
-      color: var(--text);
-    }
-
-    .seo-article h3:first-child {
-      margin-top: 0;
-    }
-
-    .seo-article p {
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      line-height: 1.8;
-    }
-
-    .seo-article ol {
-      color: var(--text-muted);
-      margin: 16px 0;
-      padding-left: 24px;
-      line-height: 1.8;
-    }
-
-    .seo-article ol li {
-      margin-bottom: 8px;
-    }
-
-    .seo-article strong {
-      color: var(--text);
-    }
-
     /* ---- BOTTOM CTA ---- */
     .bottom-cta {
       padding: 80px 24px;
@@ -1143,7 +1125,7 @@
     <ul class="nav-links">
       <li><a href="#what-is-openclaw">What is OpenClaw?</a></li>
       <li><a href="#faq">FAQ</a></li>
-      <li><a href="#guide">Deep dive</a></li>
+
       <li><a href="#pricing">Pricing</a></li>
     </ul>
   </nav>
@@ -1437,55 +1419,43 @@
             </div>
           </div>
         </div>
+
+        <div class="faq-item reveal reveal-delay-2">
+          <button class="faq-question" aria-expanded="false">
+            Why are businesses paying attention to OpenClaw?
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer" role="region">
+            <div class="faq-answer-inner">
+              OpenClaw went from 9,000 to 100,000+ GitHub stars in a single week. But the real story isn't the hype &mdash; it's what happened after. Businesses started deploying it. The appeal is simple: a self-hosted AI assistant that connects to Slack, Teams, WhatsApp, and a dozen other messaging platforms your team already uses &mdash; with full data ownership, no per-seat licensing, and limitless customization through its skills system.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item reveal reveal-delay-3">
+          <button class="faq-question" aria-expanded="false">
+            What are the top real-world use cases?
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer" role="region">
+            <div class="faq-answer-inner">
+              From HN threads, Reddit, and power user blogs: customer support on WhatsApp/Telegram, internal knowledge assistants on Slack connected to company docs, lead qualification via webchat, content and copywriting pipelines for marketing teams, and DevOps on-call bots that let team members query system status from Slack or Discord.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-question" aria-expanded="false">
+            When is OpenClaw NOT the right choice?
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer" role="region">
+            <div class="faq-answer-inner">
+              Honest advice from the community: don't use OpenClaw if you need SOC 2 compliance out of the box, if your team doesn't have anyone comfortable with a command line, if you need enterprise-grade SLAs, or if you're handling highly regulated data (healthcare, finance) without a dedicated security team to audit the deployment. In those cases, ChatGPT Enterprise or a purpose-built enterprise AI platform is the safer bet.
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== LONG-FORM SEO CONTENT ===== -->
-  <section class="seo-content" id="guide">
-    <div class="container">
-      <h2 class="reveal">OpenClaw for business: the deep dive</h2>
-
-      <article class="seo-article reveal reveal-delay-1">
-        <h3 id="why-businesses-care">Why businesses are paying attention to OpenClaw</h3>
-        <p>OpenClaw went from 9,000 to 100,000+ GitHub stars in a single week. But the real story isn't the hype &mdash; it's what happened after. Businesses started deploying it. Teams started building on it. And a rich ecosystem of power users emerged with hard-won knowledge about what actually works in production.</p>
-        <p>The appeal for business is simple: OpenClaw gives you a self-hosted AI assistant that connects to Slack, Teams, WhatsApp, and a dozen other messaging platforms your team already uses &mdash; with full data ownership, no per-seat licensing, and limitless customization through its skills system.</p>
-
-        <h3 id="real-use-cases">Real use cases from the community</h3>
-        <p>From HN threads, Reddit discussions, and power user blogs, these are the business use cases where OpenClaw is gaining traction:</p>
-        <ol>
-          <li><strong>Customer support on WhatsApp/Telegram</strong> &mdash; small businesses using OpenClaw as a first-line support agent, connected to their knowledge base via custom skills</li>
-          <li><strong>Internal knowledge assistant on Slack</strong> &mdash; teams connecting OpenClaw to company docs, Notion, Confluence, and internal APIs so employees can ask questions in natural language</li>
-          <li><strong>Lead qualification</strong> &mdash; using OpenClaw in a webchat or WhatsApp to qualify inbound leads before routing to sales</li>
-          <li><strong>Content and copywriting pipelines</strong> &mdash; marketing teams using OpenClaw as a writing assistant accessible from their existing workflow tools</li>
-          <li><strong>DevOps and on-call</strong> &mdash; connecting OpenClaw to monitoring systems so team members can query system status from Slack or Discord</li>
-        </ol>
-
-        <h3 id="deployment-strategies">Deployment strategies: what power users recommend</h3>
-        <p>The community has converged on a few preferred approaches:</p>
-        <p><strong>For small teams (2&ndash;20 people):</strong> Docker on a small VPS (Hetzner, DigitalOcean, or Linode). Costs $5&ndash;20/month for hosting. Run the onboarding wizard, connect your preferred AI model (Claude or ChatGPT), and link your messaging platforms. Most teams are up and running in under an hour.</p>
-        <p><strong>For mid-size companies:</strong> Docker Compose or Kubernetes on your existing infrastructure. Use environment variables for secrets, set up a reverse proxy with authentication, and implement skill allowlisting. The HN consensus is that Railway and Render work well for managed deployments if you don't want to manage infrastructure.</p>
-        <p><strong>For enterprise:</strong> Dedicated VMs or containers with network isolation, centralized logging, API key rotation, and a formal skill review process. Some organizations run OpenClaw behind their existing API gateway for traffic management and monitoring.</p>
-
-        <h3 id="security-honest-take">Security: the honest take</h3>
-        <p>This is where our expert goes deep. The security picture for OpenClaw in a business context:</p>
-        <p><strong>What's solid:</strong> Open-source code you can audit. Self-hosted, so customer data doesn't leave your infrastructure. You choose the AI provider and control the data pipeline. Active community spotting and patching vulnerabilities.</p>
-        <p><strong>What's concerning:</strong> Cisco's AI security team found that a third-party skill performed data exfiltration and prompt injection without user awareness. The skill ecosystem is young and lacks formal security review. Prompt injection remains an unsolved industry problem. One of OpenClaw's own maintainers publicly warned about the technical expertise needed to run it safely.</p>
-        <p><strong>The business calculation:</strong> For internal tools with trusted users, the risk is manageable with proper deployment practices. For customer-facing deployments, you need input/output filtering, skill auditing, and monitoring. The expert can help you assess the risk for your specific use case.</p>
-
-        <h3 id="cost-analysis">Cost analysis: what it really costs to run</h3>
-        <p>OpenClaw is free. Everything else isn't:</p>
-        <ul>
-          <li><strong>AI provider:</strong> Claude API or ChatGPT API &mdash; $20&ndash;100/month for a small team, scaling with usage. This is your biggest variable cost.</li>
-          <li><strong>Hosting:</strong> $5&ndash;50/month depending on provider and scale. A $6/month Hetzner VPS handles most small-team deployments.</li>
-          <li><strong>Time to deploy:</strong> 1&ndash;4 hours for basic setup, 1&ndash;2 weeks for a production-grade enterprise deployment with custom skills.</li>
-          <li><strong>Maintenance:</strong> Minimal for basic setups. Budget 2&ndash;4 hours/month for updates, monitoring, and skill management.</li>
-        </ul>
-        <p>Compare this to ChatGPT Enterprise at $60/user/month or Microsoft Copilot at $30/user/month. For a 20-person team, OpenClaw could save you $7,000&ndash;14,000/year &mdash; if you have the technical capacity to run it.</p>
-
-        <h3 id="when-not-to-use">When OpenClaw is NOT the right choice</h3>
-        <p>Honest advice from the community: don't use OpenClaw if you need SOC 2 compliance out of the box, if your team doesn't have anyone comfortable with a command line, if you need enterprise-grade SLAs, or if you're handling highly regulated data (healthcare, finance) without a dedicated security team to audit the deployment. In those cases, ChatGPT Enterprise or a purpose-built enterprise AI platform is the safer bet.</p>
-      </article>
     </div>
   </section>
 
