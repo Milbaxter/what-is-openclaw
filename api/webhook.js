@@ -44,18 +44,28 @@ export default async function handler(req, res) {
     if (tokenId && session.payment_status === 'paid') {
       const existing = await redis.get(`token:${tokenId}`);
       if (!existing) {
-        const tokenData = {
-          id: tokenId,
-          remaining: 1200,
-          active: false,
-          session_start: null,
-          created_at: Date.now(),
-          stripe_session_id: session.id,
-        };
+        const type = session.metadata?.type || 'voice';
+
+        const tokenData = type === 'research'
+          ? {
+              id: tokenId,
+              type: 'research',
+              created_at: Date.now(),
+              stripe_session_id: session.id,
+            }
+          : {
+              id: tokenId,
+              type: 'voice',
+              remaining: 1200,
+              active: false,
+              session_start: null,
+              created_at: Date.now(),
+              stripe_session_id: session.id,
+            };
 
         await redis.set(`token:${tokenId}`, JSON.stringify(tokenData), { ex: 90 * 24 * 60 * 60 });
 
-        console.log(`Token created: ${tokenId} (${tokenData.remaining}s)`);
+        console.log(`Token created: ${tokenId} (type: ${type})`);
       }
     }
   }

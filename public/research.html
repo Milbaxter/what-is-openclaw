@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Data — What is OpenClaw?</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #faf7f4;
+      --bg-warm: #f5efe9;
+      --text: #2a2420;
+      --text-muted: #7a706a;
+      --primary: #e8604c;
+      --primary-dark: #d44f3c;
+      --primary-light: #fbeae7;
+      --primary-glow: rgba(232, 96, 76, 0.25);
+      --surface: #ffffff;
+      --border: #e8e2dc;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+      font-size: 1.1rem;
+      line-height: 1.75;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.018;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    h1, h2, h3 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-weight: 400;
+      line-height: 1.15;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--primary-dark); text-decoration: underline; }
+
+    .header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo span { font-size: 1.4rem; }
+
+    .state {
+      display: none;
+      max-width: 500px;
+      margin: 80px auto;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .state.active { display: block; }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-icon { font-size: 3rem; margin-bottom: 16px; }
+    .error-title { font-size: 1.6rem; margin-bottom: 8px; }
+    .error-msg { color: var(--text-muted); margin-bottom: 24px; }
+    .btn-link { color: var(--primary); font-size: 1rem; text-decoration: none; }
+    .btn-link:hover { text-decoration: underline; }
+
+    .research-container {
+      display: none;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .research-container.active { display: block; }
+
+    .research-header {
+      text-align: center;
+      padding: 40px 0 32px;
+    }
+
+    .research-header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 12px;
+    }
+
+    .research-header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-warm);
+      border-radius: 100px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      font-family: 'Newsreader', serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .tab-desc {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 16px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      padding: 12px 0;
+      z-index: 10;
+    }
+
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Newsreader', serif;
+      font-size: 0.95rem;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toolbar-btn:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .research-text {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .research-text.active { display: block; }
+
+    .research-text h2 {
+      font-size: 1.5rem;
+      margin: 32px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .research-text h2:first-child { margin-top: 0; }
+
+    .research-text h3 {
+      font-size: 1.2rem;
+      margin: 24px 0 8px;
+    }
+
+    .research-text p { margin-bottom: 16px; }
+
+    .research-text ul, .research-text ol {
+      margin: 12px 0 16px 24px;
+    }
+
+    .research-text li { margin-bottom: 6px; }
+    .research-text strong { color: var(--text); }
+    .research-text em { font-style: italic; }
+    .research-text hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    .research-text blockquote {
+      border-left: 3px solid var(--primary);
+      padding-left: 20px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .research-text code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.9em;
+      background: var(--bg-warm);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .research-text pre {
+      background: var(--bg-warm);
+      padding: 16px 20px;
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      margin: 12px 0 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+    .research-text table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+    .research-text th, .research-text td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .research-text th {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      background: var(--bg-warm);
+    }
+
+    .footer {
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer a { color: var(--text-muted); text-decoration: none; }
+    .footer a:hover { color: var(--primary); }
+
+    @media (max-width: 600px) {
+      .research-text { padding: 24px 20px; }
+      .toolbar { flex-wrap: wrap; }
+      .tab-btn { font-size: 0.9rem; padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="/" class="nav-logo">
+      <span>&#129438;</span> What is OpenClaw?
+    </a>
+  </div>
+
+  <div class="state active" id="state-loading">
+    <div class="spinner"></div>
+    <p style="color: var(--text-muted); font-size: 1rem;">Verifying your access...</p>
+  </div>
+
+  <div class="state" id="state-error">
+    <div class="error-icon">&#129438;</div>
+    <h2 class="error-title" id="error-title">Something went wrong</h2>
+    <p class="error-msg" id="error-msg">We couldn't verify your access.</p>
+    <a href="/" class="btn-link">Back to homepage</a>
+  </div>
+
+  <div class="research-container" id="research-content">
+    <div class="research-header">
+      <h1>OpenClaw Research Data</h1>
+      <p>The complete knowledge base powering our voice expert. Copy it, paste it into your own AI agent, and go.</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="condensed" onclick="switchTab('condensed')">Condensed Version</button>
+      <button class="tab-btn" data-tab="full" onclick="switchTab('full')">Full Research</button>
+    </div>
+
+    <div class="tab-desc" id="tab-desc">Quick reference — all the key facts, no fluff.</div>
+
+    <div class="toolbar">
+      <button class="toolbar-btn" id="copy-btn" onclick="copyAll()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy all
+      </button>
+      <button class="toolbar-btn" onclick="downloadAll()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download .txt
+      </button>
+    </div>
+
+    <!-- ===== CONDENSED VERSION ===== -->
+    <div class="research-text active" id="text-condensed">
+<h2>What Is OpenClaw</h2>
+
+<h3>The Short Answer</h3>
+<p>OpenClaw is a personal AI assistant that runs on your computer. It does not just answer questions. It takes real actions across your apps. It is open source and free to download. It has nearly 200,000 stars on GitHub. That makes it one of the most popular open source projects of the year.</p>
+
+<p>The tagline is "The AI that does things." That sums it up. ChatGPT and Claude give you answers in a chat box. OpenClaw connects to your real apps and acts. It sends emails. It manages your calendar. It browses the web. It organizes files. It runs scheduled tasks. It automates workflows. All on its own.</p>
+
+<h3>The Simple Analogy</h3>
+<p>Imagine hiring a personal assistant who lives on your computer. You text this assistant through WhatsApp, Telegram, or iMessage. It has access to your email, calendar, browser, and files. It learns new abilities through plugins called skills. It works around the clock. It remembers everything you tell it. That is OpenClaw.</p>
+
+<p>One contributor put it simply. Imagine a secretary in your pocket with access to your computer. What would you ask a secretary to do? Ask OpenClaw to do that.</p>
+
+<h3>The Problem It Solves</h3>
+<p>Before OpenClaw, AI was passive. You opened a chatbot. You typed a question. You got an answer. You closed it. Every time you wanted something done, you had to initiate it.</p>
+
+<p>OpenClaw flips that. It turns AI from something you talk to into something that works for you. Continuously. Across all your apps. Around the clock. It is the shift from chatbot to employee.</p>
+
+<p>The pain points it addresses are clear. You are drowning in repetitive tasks. Emails, scheduling, research, data entry. You use many apps and manually move data between them. You pay people for work that could be automated. AI tools exist but none connect to your real workflow.</p>
+
+<p>One business owner cut monthly costs from 40,000 to 10,000 dollars. He did it by using OpenClaw to automate process work.</p>
+
+<h3>Who Made It</h3>
+<p>Peter Steinberger created OpenClaw. He is an Austrian developer. He came out of retirement to build it. He has over 270,000 followers on X. He calls himself the Claw Father.</p>
+
+<p>The project is fully open source. It has nearly 200,000 GitHub stars. Over 30,000 forks. More than 25 active contributors per release. It is backed by Y Combinator. Multiple YC startups are building on top of it.</p>
+
+<p>Key ideas from Steinberger's YC talk. All apps will become APIs or disappear. Your agent will be the primary consumer of software. Personal AI agents will quietly take over daily workflows.</p>
+
+<p>The project was previously called Moltbot and Clawdbot. Same project, just rebranded. The lobster emoji is its mascot.</p>
+
+<h3>How It Is Different from a Chatbot</h3>
+<p>This is the most important distinction. ChatGPT and Claude are chatbots. You ask a question. You get an answer. OpenClaw is an agent. You give it a task. It goes and does it.</p>
+
+<p>A chatbot tells you how to send an email. OpenClaw sends the email. A chatbot explains how to schedule a meeting. OpenClaw books the meeting. A chatbot lives in a browser tab. OpenClaw lives on your computer and reaches into all your apps.</p>
+
+<h3>Common Misconceptions</h3>
+<p>It is not just another chatbot. Chatbots answer questions. OpenClaw does things. It sends emails, browses the web, manages files, and automates workflows.</p>
+
+<p>It is not a ChatGPT wrapper. It is a full agent framework. It has a gateway architecture, multi-channel communication, a skills marketplace, memory systems, browser automation, and more. ChatGPT is one possible brain it can use. Among many.</p>
+
+<p>You do not need to be a developer. Setup requires some technical knowledge. But hosted options like Bits, EasyClaw, and StartClaw handle it for you. Once set up, you just text it.</p>
+
+<p>It is not completely free. The software is free. Running it costs money. AI API credits run between 20 and 250 dollars per month. A dedicated machine costs 200 to 800 dollars one time.</p>
+
+<p>It is not dangerous. It is a tool, like email or spreadsheets. Security risks are real but manageable with proper setup.</p>
+
+<h2>OpenClaw Capabilities and Use Cases</h2>
+
+<h3>How It Works in Simple Terms</h3>
+<p>OpenClaw has three layers. The brain is an AI model like Claude or GPT. It thinks and makes decisions. The gateway is a control center on your computer. It connects everything together. The channels are how you talk to it. WhatsApp, Telegram, Discord, iMessage, or Slack.</p>
+
+<p>The flow is simple. You send a message on WhatsApp. The gateway receives it. The AI brain processes it. It takes action. Maybe it sends an email or updates your calendar. Then it reports back on the same channel.</p>
+
+<h3>Key Concepts</h3>
+<p>The gateway is the central hub on your machine. Everything flows through it. It is always on.</p>
+
+<p>An agent is the AI brain that processes your requests. You can have multiple agents.</p>
+
+<p>Skills are plugins that give your agent new abilities. Search the web. Manage email. Control your browser. Over 3,000 are available on ClawHub. Think of ClawHub as an app store for agent skills.</p>
+
+<p>Channels are how you communicate. WhatsApp, Telegram, Discord, iMessage, Slack, and more.</p>
+
+<p>Memory means your agent remembers past conversations. It gets better over time.</p>
+
+<p>Cron jobs are scheduled tasks. Check my email every 15 minutes. Send me a morning briefing at 8 AM.</p>
+
+<p>The SOUL file defines your agent's personality. The HEARTBEAT file defines what it should do proactively on a schedule.</p>
+
+<h3>AI Models It Supports</h3>
+<p>OpenClaw works with many AI providers. It is not locked to one.</p>
+
+<p>Claude by Anthropic is the most popular choice. Opus is the most capable. Sonnet is cheaper but still strong. GPT by OpenAI is a solid alternative. Grok by xAI includes web search. Kimi is popular as a cheaper sub-agent. Local models run free through Ollama but are less capable.</p>
+
+<p>The recommended setup is Claude Opus as the main agent. Use a cheaper model like Sonnet or Kimi for simpler tasks. A tool called LLM Router can automatically route between models. Simple tasks go to cheap models. Complex ones go to premium models.</p>
+
+<h3>Real Use Cases</h3>
+<p>These are real things actual users are doing today.</p>
+
+<h3>Email and Communication</h3>
+<p>People use it to read, sort, and respond to emails. It manages drip campaigns automatically. One user forwards charging station receipts to his agent. The agent downloads the PDF, extracts the price, and logs it automatically.</p>
+
+<h3>Calendar and Scheduling</h3>
+<p>It manages calendars, books meetings, and sends reminders. One non-technical user set up Google Calendar integration on her own. Once the base system runs, calendar management is straightforward.</p>
+
+<h3>Research and Content</h3>
+<p>It researches topics and compiles reports. It writes and deploys blog posts. One user has his agent deliver a morning briefing. It summarizes emails, Slack messages, and support tickets while he drives to work.</p>
+
+<h3>Business Operations</h3>
+<p>People run multiple agents handling different roles. Developer, strategist, marketer. One user had seven AI employees running within four days. The biggest result reported is a business cutting monthly costs from 40,000 to 10,000 dollars.</p>
+
+<h3>Finance and Analysis</h3>
+<p>The Stripe CEO used it to analyze health data. Others use it for stock analysis and automated trading strategies.</p>
+
+<h3>Home and Personal</h3>
+<p>It handles home automation. One user logs food and nutrition by sending photos to his agent. People save and categorize articles into Notion automatically.</p>
+
+<h3>Development</h3>
+<p>Developers build and deploy infrastructure by texting their agent. It handles browser automation and runs as a scheduled pipeline engine.</p>
+
+<h3>The Skills Ecosystem</h3>
+<p>Skills are like apps for your agent. Over 3,000 are available on ClawHub.</p>
+
+<p>The most essential skill is internet search. Without it, the agent is blind. The find-skills skill lets the agent discover new skills on its own. Browser control is built in and gives full Chrome automation.</p>
+
+<p>Other popular skills include Google Calendar, email management, and Composio which connects to over 100 SaaS tools. The MemOS plugin cuts token costs by over 70 percent.</p>
+
+<p>One security note about skills. There was a malware incident. A popular skill was stealing data. In response, every ClawHub skill is now scanned by VirusTotal automatically. Skills get benign, suspicious, or malicious ratings. All skills are rescanned daily.</p>
+
+<p>Your agent can also write its own skills. It extends its own capabilities as needed.</p>
+
+<h3>Who Is Using It</h3>
+<p>The user base is diverse. Solo founders automate their business stack. Developers use it for coding and operations. Non-technical business owners automate process work with help setting up. Content creators automate research and publishing. The finance community builds trading bots.</p>
+
+<p>Regular non-technical people use it too. One user said he has no idea about software. His OpenClaw now brews beer and runs half his design company.</p>
+
+<h2>OpenClaw Setup and Costs</h2>
+
+<h3>The Honest Truth About Setup</h3>
+<p>Setup is the number one complaint. Y Combinator acknowledged that OpenClaw is effective but hard to set up. Some say even most engineers give up. Others push back and say it is fine for anyone comfortable with a terminal.</p>
+
+<p>The truth is in between. If you are technical, expect a few hours with some debugging. If you are not technical, get help or use a hosted service.</p>
+
+<h3>Option 1: Self-Hosted</h3>
+<p>This is the free approach. You need a computer that stays on. Most people buy a Mac Mini for 500 to 800 dollars. You need an AI API key from Anthropic or OpenAI.</p>
+
+<p>You install OpenClaw with a command-line tool. The onboarding wizard walks you through setup. Authentication, workspace, channels, and skills.</p>
+
+<p>Self-hosting keeps your data on your machine. You have full control. But your computer must stay on around the clock.</p>
+
+<h3>Option 2: Hosted Services</h3>
+<p>Several startups offer OpenClaw as a managed service. Bits is YC-backed and sets up a cloud instance for you. StartClaw gets you running in about 60 seconds. Tensol AI turns OpenClaw into full-time AI employees. There are others too.</p>
+
+<p>These remove the setup burden. You pay a monthly fee instead of managing hardware.</p>
+
+<h3>Option 3: Hire Someone</h3>
+<p>People charge about 1,500 dollars to set up OpenClaw. It takes them about an hour. This has become a real cottage industry.</p>
+
+<h3>What Does It Cost to Run</h3>
+<p>The software is free. Costs come from AI usage and hardware.</p>
+
+<h3>AI Model Costs</h3>
+<p>This is the main expense. You pay per usage. Heavy use with Claude Opus costs about 250 dollars per week. Heavy use with Sonnet costs about 100 per week. Moderate use with GPT can be as low as 20 dollars per month. Most people spend between 50 and 200 dollars per month.</p>
+
+<p>One power user running a large agency spends about 100 dollars per day. He says it reduces mental load but is not clearly ROI positive yet.</p>
+
+<h3>Ways to Reduce Costs</h3>
+<p>Use cheap models for simple tasks. Save expensive models for complex work. LLM Router automates this switching. The MemOS plugin cuts token usage by over 70 percent. Local models through Ollama are free but less capable. Stick with one model. Frequent switching causes problems.</p>
+
+<h3>Hardware Costs</h3>
+<p>A Mac Mini runs 500 to 800 dollars. It is the most popular choice. A Linux mini PC works for about 200 dollars. Cloud servers vary. Your existing computer works if it stays on.</p>
+
+<h3>Subscriptions</h3>
+<p>Some providers offer flat-rate plans. Anthropic has Pro and Max plans for 100 to 200 dollars per month. OpenAI offers plans at 20 or 200 dollars per month.</p>
+
+<h3>Optimizing Your Setup</h3>
+<p>Set up the core configuration files. The SOUL file defines personality. Make it authentic. The creator says delete anything corporate. Be the assistant you would want at 2 AM.</p>
+
+<p>The USER file stores your timezone, projects, and preferences. The MEMORY file holds long-term context. Things to never forget. Key projects. Lessons learned. The HEARTBEAT file defines recurring tasks. Daily checks and quiet hours.</p>
+
+<p>Set up an activity feed. Track every action your agent takes. This is critical so you see what it does and whether it wastes tokens.</p>
+
+<p>Keep it simple to start. One agent handles 90 percent of tasks. No need for sub-agents right away. Start with email, scheduling, and research. Expand from there.</p>
+
+<h2>OpenClaw Security and Privacy</h2>
+
+<h3>The Security Advantages</h3>
+<p>OpenClaw runs on your machine. Your data stays on your hardware. Not in someone else's cloud. This is a major privacy advantage.</p>
+
+<p>The project is open source. Anyone can audit the code. Every skill on ClawHub is scanned by VirusTotal automatically. Results come in about 30 seconds. All skills are rescanned daily.</p>
+
+<p>Docker sandboxing is available for shared sessions. It limits what the agent can access. Unknown senders get a pairing code. They cannot access your agent directly.</p>
+
+<h3>The Security Concerns</h3>
+<p>The agent has full access to your machine by default. A misconfigured agent could reach sensitive files.</p>
+
+<p>There was one confirmed malware incident. A popular skill was stealing data. Scanning has improved since then. But be careful which skills you install.</p>
+
+<p>CrowdStrike published a warning. OpenClaw is powerful but can be an enterprise backdoor if misconfigured. Most users skip security setup entirely. That is risky.</p>
+
+<h3>Security Best Practices</h3>
+<p>Use a dedicated machine. Do not run it on your main computer. A Mac Mini works well.</p>
+
+<p>Set up Tailscale for secure remote access. Do not expose it directly to the internet.</p>
+
+<p>Use command allowlists. Restrict what your agent can do. This limits damage if something goes wrong.</p>
+
+<p>Only install verified skills. The community maintains a curated safe list of audited skills.</p>
+
+<p>Enable Docker sandboxing for group sessions. Review the community security hardening guide.</p>
+
+<p>For businesses, be extra cautious. Use access controls, sandboxing, and verified skills only. Monitor the activity feed regularly. Non-primary sessions should always be sandboxed.</p>
+
+<h3>Data Privacy</h3>
+<p>Self-hosted means your data stays local. But the AI provider receives your prompts. Their privacy policy applies.</p>
+
+<p>Local models through Ollama keep everything on your hardware. They are less capable but fully private.</p>
+
+<p>Hosted services handle setup for you. But your data passes through their systems. Check their privacy policies.</p>
+
+<h2>OpenClaw Frequently Asked Questions</h2>
+
+<h3>What is OpenClaw in one sentence?</h3>
+<p>OpenClaw is a free, open-source AI assistant that runs on your computer and takes real actions across your apps.</p>
+
+<h3>How is it different from ChatGPT or Claude?</h3>
+<p>Those are chatbots. You ask, they answer. OpenClaw is an agent. You give it a task, it does it. A chatbot tells you how to send an email. OpenClaw sends the email.</p>
+
+<h3>How is it different from Zapier or Make?</h3>
+<p>Zapier runs pre-defined automations. If this, then that. OpenClaw reasons about what to do. It handles exceptions. It adapts. It does everything Zapier does, plus it thinks.</p>
+
+<h3>How is it different from Cursor or Claude Code?</h3>
+<p>Those are coding tools. OpenClaw is AI for everything. Email, calendar, research, business operations, and code. Many people use Cursor for coding and OpenClaw for everything else.</p>
+
+<h3>Who created it?</h3>
+<p>Peter Steinberger. Austrian developer. Came out of retirement to build it. Backed by Y Combinator. Nearly 200,000 GitHub stars.</p>
+
+<h3>Is it free?</h3>
+<p>The software is free. Running it costs money. AI credits run 20 to 250 dollars per month. A dedicated computer costs 200 to 800 dollars one time.</p>
+
+<h3>Do I need to be technical?</h3>
+<p>For self-hosted setup, some technical knowledge helps. But hosted services handle it for you. You can also hire someone for about 1,500 dollars. Once running, you just text it. No coding needed.</p>
+
+<h3>What hardware do I need?</h3>
+<p>A computer that stays on. Most people use a Mac Mini for 500 to 800 dollars. A Linux mini PC works for about 200. Your existing computer works if it stays on.</p>
+
+<h3>How long does setup take?</h3>
+<p>Technical users need a few hours. Some finish in under an hour. Others need half a day. Hosted services take about a minute. Hiring someone takes about an hour.</p>
+
+<h3>Can I use it on my phone?</h3>
+<p>It does not run on your phone. It runs on a computer. But you text it through your phone. Use WhatsApp, Telegram, iMessage, Discord, or Slack. There is also a dedicated iOS app called Aight.</p>
+
+<h3>How much per month?</h3>
+<p>Depends on model and usage. GPT on a subscription can be 20 dollars per month. Sonnet runs about 100 per week for heavy use. Opus runs about 250 per week for heavy use. Most people spend 50 to 200 dollars per month.</p>
+
+<h3>How can I reduce costs?</h3>
+<p>Use cheap models for simple tasks. Save expensive models for complex work. LLM Router automates this. The MemOS plugin cuts token usage by over 70 percent. Local models are free.</p>
+
+<h3>Is it worth it for a business?</h3>
+<p>One business cut costs from 40,000 to 10,000 dollars per month. A power user at a large agency spends about 100 dollars per day. He says it meaningfully reduces workload. Start with repetitive tasks where savings are obvious.</p>
+
+<h3>What can it actually do?</h3>
+<p>Send and manage emails. Book meetings. Research topics. Automate business processes. Browse the web. Manage files. Run scheduled tasks. Control smart home devices. Track health data. Deploy software. Analyze finances. Create content. Anything you would ask a personal assistant to do on a computer.</p>
+
+<h3>What AI models does it support?</h3>
+<p>Claude by Anthropic is most popular. Also GPT by OpenAI, Grok by xAI, Kimi, and local models through Ollama. Use a powerful model as the main agent. Use a cheaper one for simple tasks.</p>
+
+<h3>What are skills?</h3>
+<p>Plugins that give your agent abilities. Like apps. Over 3,000 on ClawHub. Internet search, email, calendar, browser control, and connections to over 100 services.</p>
+
+<h3>Can it learn and remember?</h3>
+<p>Yes. It remembers conversations and context. You can set up memory files for things it should never forget. It gets better over time.</p>
+
+<h3>Can it write its own skills?</h3>
+<p>Yes. It can create new skills for itself when it encounters tasks it cannot handle yet.</p>
+
+<h3>Is my data safe?</h3>
+<p>Self-hosted means data stays on your machine. The AI provider sees your prompts. Local models keep everything private but are less capable. Use a dedicated machine and verified skills.</p>
+
+<h3>Was there a security incident?</h3>
+<p>Yes. One popular skill was stealing data. Now every skill is scanned by VirusTotal automatically. All skills are rescanned daily. A community member also audited over 4,000 skills independently.</p>
+
+<h3>Should I use a dedicated computer?</h3>
+<p>Yes. Strongly recommended. The agent accesses everything on your machine. A dedicated device limits the risk.</p>
+
+<h3>My agent keeps forgetting things.</h3>
+<p>This has been improved in recent updates. Update to the latest version. Set up structured memory files. Include things to never forget, key projects, and lessons learned.</p>
+
+<h3>I do not know what to use it for.</h3>
+<p>Start with email triage. Set up a morning briefing. Have it manage your schedule. Then expand to research, data entry, and content creation.</p>
+
+<h3>How reliable is it?</h3>
+<p>Getting better with each release. Memory and context issues have been fixed. But it is still early software. Expect some inconsistency with complex tasks. It moves the needle meaningfully. But it is not perfect yet.</p>
+
+<h3>Can it replace employees?</h3>
+<p>It replaces tasks, not people. Not yet. It handles the repetitive 80 percent. Your team focuses on the creative 20 percent. Some solo operators run entire businesses with it.</p>
+
+<h3>Is it better than a virtual assistant?</h3>
+<p>Different strengths. OpenClaw is always on, instant, and cheaper over time. A human VA handles ambiguity better and makes judgment calls. OpenClaw wins at structured, repetitive work. Humans win at nuanced, relationship-heavy work.</p>
+
+<h3>Where can I learn more?</h3>
+<p>The GitHub repository has documentation. There is an active Discord community. freeCodeCamp published a tutorial course. The creator appeared on the Lex Fridman podcast. Community meetups happen regularly.</p>
+
+<h3>Who should I follow for updates?</h3>
+<p>Peter Steinberger the creator and the official OpenClaw account. The GitHub repository is the best source for release notes.</p>
+    </div>
+
+    <!-- ===== FULL RESEARCH VERSION ===== -->
+    <div class="research-text" id="text-full">
+<h2>OpenClaw: The Complete Knowledge Base</h2>
+
+<blockquote>For the world's #1 expert on OpenClaw, aimed at non-technical people. Everything sourced from X posts, articles, the GitHub repo, and community discourse. Last updated: 2026-02-12.</blockquote>
+
+<hr>
+
+<h2>1. The Problem OpenClaw Solves</h2>
+
+<p>Before OpenClaw, AI was <em>passive</em>. You opened ChatGPT, typed a question, got an answer, and closed it. Every time you wanted something done, <em>you</em> had to go initiate it. You were the operator.</p>
+
+<p>OpenClaw flips that. It turns AI from something you <em>talk to</em> into something that <em>works for you</em> — continuously, across all your apps, 24/7. It's the shift from chatbot to employee.</p>
+
+<p><strong>The pain points it addresses:</strong></p>
+<ul>
+<li>You're drowning in repetitive digital tasks (emails, scheduling, research, data entry)</li>
+<li>You use 10+ apps daily and manually shuttle information between them</li>
+<li>You pay employees or VAs for work that could be automated</li>
+<li>AI tools exist but none of them <em>connect</em> to your real workflow — they're stuck in a chat box</li>
+</ul>
+
+<p>As @BritishHodl put it: <em>"Friend of mine has a business that costs ~$40,000 a month to run, within a week, the cost is now down to ~$10,000 a month because of OpenClaw managing all the process work with AI."</em></p>
+
+<hr>
+
+<h2>2. What Is OpenClaw? (Plain English)</h2>
+
+<p><strong>The one-liner:</strong> OpenClaw is a personal AI assistant that runs on your own computer and can actually <em>do things</em> across your apps — not just answer questions.</p>
+
+<p><strong>The analogy:</strong> Imagine hiring a super-smart personal assistant who:</p>
+<ul>
+<li>Lives on your computer (or a dedicated Mac Mini)</li>
+<li>You can text via WhatsApp, Telegram, Discord, iMessage, or Slack</li>
+<li>Has access to your email, calendar, browser, files, and any app with an API</li>
+<li>Can learn new "skills" (like plugins) to do more things</li>
+<li>Works 24/7 without breaks</li>
+<li>Remembers everything you've told it</li>
+</ul>
+
+<p>As @jjpcodes (an OpenClaw contributor) put it: <em>"Just imagine you have a secretary in your pocket that also has access to your computer. That's it. What would you ask a secretary to do? Ask your OpenClaw to do."</em></p>
+
+<p><strong>Key distinction:</strong> Unlike ChatGPT or Claude (the chat interfaces), OpenClaw doesn't just <em>talk</em> — it <em>acts</em>. It can open your browser, send emails, manage files, run scheduled tasks, and more.</p>
+
+<p><strong>Official description from the project:</strong> <em>"A personal AI assistant you run on your own devices"</em> with the tagline <em>"The AI that does things."</em></p>
+
+<p><strong>Names you might see:</strong> OpenClaw was previously known as "Moltbot" and "Clawdbot." Same project, rebranded. The lobster emoji is its mascot.</p>
+
+<hr>
+
+<h2>3. Who Made It?</h2>
+
+<p><strong>Creator:</strong> Peter Steinberger (@steipete) — an Austrian developer who came out of retirement to build OpenClaw. His X bio reads: <em>"Polyagentmorous ClawFather. Came back from retirement to mess with AI and help a lobster take over the world."</em> He has 273K+ followers.</p>
+
+<p><strong>Open source:</strong> OpenClaw is fully open source on GitHub with <strong>189,000+ stars</strong> (as of Feb 2026), making it one of the most viral open source projects of the year. It has 32K+ forks and an active community of 25+ contributors per release.</p>
+
+<p><strong>Backed by Y Combinator:</strong> Steipete presented at YC, where the project gained significant visibility. Multiple YC-backed startups are now building on top of OpenClaw.</p>
+
+<p><strong>Key quote from steipete's YC talk</strong> (summarized by @kyriakosel, 1.5K likes):</p>
+<ul>
+<li><em>"All apps will become APIs or disappear"</em></li>
+<li><em>"Your agent, not you, will be the primary consumer of software"</em></li>
+<li><em>"Personal AI agents will quietly take over daily workflows"</em></li>
+</ul>
+
+<hr>
+
+<h2>4. What Can It Actually Do? (Real Use Cases)</h2>
+
+<p>These are real things people are doing with OpenClaw right now, sourced from X:</p>
+
+<h3>Email &amp; Communication</h3>
+<ul>
+<li>Read, sort, and respond to emails on your behalf</li>
+<li>Manage email drip campaigns automatically</li>
+<li>Forward receipts and have it extract data and file it</li>
+<li><em>"I forward the receipt emails from my EV charging station to my agent, which downloads the linked pdf, extracts the total price and enters it into teslamate automatically"</em> — @jmporchet</li>
+</ul>
+
+<h3>Calendar &amp; Scheduling</h3>
+<ul>
+<li>Manage your calendar, book meetings, send reminders</li>
+<li>Google Calendar integration (even a non-technical fiancee set it up: @MaxBladee)</li>
+</ul>
+
+<h3>Research &amp; Content</h3>
+<ul>
+<li>Research topics and compile reports</li>
+<li>Write and deploy blog posts</li>
+<li>Create content workflows with NotebookLM: <em>"NotebookLM researches the topic, builds structure, OpenClaw executes"</em> — @JulianGoldieSEO</li>
+<li>Morning news briefings: <em>"My openclaw agent acts like a personal morning newsreader — my emails, slack, support tickets — while I drive to office"</em> — @KaranVaidya6</li>
+</ul>
+
+<h3>Business Operations</h3>
+<ul>
+<li>Run an AI "company" with multiple agents handling different roles (developer, strategist, marketer): <em>"Day 4 of OpenClaw — I hired my 7th AI employee today!"</em> — @VadimStrizheus (4.7K likes)</li>
+<li>Manage customer support workflows</li>
+<li>Process work automation that cut costs from $40K to $10K/month</li>
+</ul>
+
+<h3>Finance &amp; Trading</h3>
+<ul>
+<li>Analyze Apple Health data, cross-reference with travel (Patrick Collison of Stripe did this)</li>
+<li>Find undervalued stocks, break down financials, write research theses (Dexter project)</li>
+<li>Automated Polymarket trading strategies</li>
+</ul>
+
+<h3>Home &amp; Personal</h3>
+<ul>
+<li>Home automation control</li>
+<li>Food logging and nutrition tracking: <em>"I let the agent save my food images and send it to my app to log food entries"</em> — @Aswin_polymath</li>
+<li>Save and categorize articles, videos, and links into Notion</li>
+<li>Document management: sort, tag, and make searchable</li>
+</ul>
+
+<h3>Development &amp; Infrastructure</h3>
+<ul>
+<li>Build and deploy production infrastructure from your couch: <em>"OpenClaw finally made sense when I looked down at my phone... I just built an entire production infrastructure... from my couch in sweatpants"</em> — @_MaxBlade</li>
+<li>Browser automation for any web-based task</li>
+<li>Run as a headless pipeline engine with cron jobs</li>
+</ul>
+
+<hr>
+
+<h2>5. Who Is Using It?</h2>
+
+<p><strong>Scale:</strong> Millions of installs after a Hacker News post sparked interest. 189K GitHub stars. Mac Minis sold out because of it.</p>
+
+<p><strong>User types:</strong></p>
+<ul>
+<li><strong>Solo founders &amp; entrepreneurs</strong> automating their entire business stack</li>
+<li><strong>Developers</strong> using it as an AI coding + operations assistant</li>
+<li><strong>Non-technical business owners</strong> (with help setting up) automating process work</li>
+<li><strong>Content creators</strong> automating research, writing, and publishing pipelines</li>
+<li><strong>Finance/crypto community</strong> for trading bots and market analysis</li>
+<li><strong>"Normies"</strong> — as steipete shared: <em>"Hi, I'm a normie, I have no idea about software and now my openclaw brews beer and runs half of our design company."</em></li>
+</ul>
+
+<p><strong>Notable mentions:</strong></p>
+<ul>
+<li>Patrick Collison (Stripe CEO) using it for health data analysis</li>
+<li>Y Combinator actively funding OpenClaw ecosystem startups</li>
+<li>freeCodeCamp published a full tutorial course</li>
+<li>CrowdStrike published a security analysis of it</li>
+<li>NordVPN recommends using Meshnet with it</li>
+</ul>
+
+<hr>
+
+<h2>6. Real Results &amp; Social Proof</h2>
+
+<table>
+<tr><th>Who</th><th>Result</th></tr>
+<tr><td>@BritishHodl's friend</td><td>Business costs cut from $40K to $10K/month</td></tr>
+<tr><td>@VadimStrizheus</td><td>7 "AI employees" running enterprise ops in 4 days</td></tr>
+<tr><td>@Jason</td><td>Built "OpenClaw ULTRON" to replace 20 people</td></tr>
+<tr><td>@danielfoch</td><td>Runs Opus 4.6 agent for ~$250/week (or ~$100 on Sonnet)</td></tr>
+<tr><td>@MaxBladee</td><td>Built an iOS app wrapper, hit $1,600 MRR in 16 hours</td></tr>
+<tr><td>@Jackkk</td><td>People charge $1,500 to set up OpenClaw (takes ~1 hour)</td></tr>
+<tr><td>@Zeneca</td><td><em>"Legitimately insane. Haven't felt this way about AI since ChatGPT first came out"</em></td></tr>
+</table>
+
+<hr>
+
+<h2>7. How Does It Work? (Simply)</h2>
+
+<h3>The Architecture (No Jargon)</h3>
+
+<p>Think of OpenClaw as having three layers:</p>
+<ol>
+<li><strong>The Brain</strong> — An AI model (like Claude Opus 4.6 or GPT-5.3) that thinks and makes decisions</li>
+<li><strong>The Gateway</strong> — A control center running on your computer that connects everything together</li>
+<li><strong>The Channels</strong> — The ways you talk to it (WhatsApp, Telegram, Discord, iMessage, Slack, web chat)</li>
+</ol>
+
+<p><strong>How it flows:</strong></p>
+<pre>You send a message on WhatsApp
+    -> Gateway receives it
+        -> AI Brain processes it
+            -> Takes action (sends email, browses web, updates calendar, etc.)
+                -> Reports back to you on WhatsApp</pre>
+
+<h3>Key Concepts</h3>
+<ul>
+<li><strong>Gateway:</strong> The central hub running on your machine. Everything flows through it. It's always on.</li>
+<li><strong>Agent (Pi):</strong> The AI "brain" that processes your requests. You can have multiple agents.</li>
+<li><strong>Skills:</strong> Plugins that teach your agent new abilities (like "search the web", "manage email", "control your browser"). There are 3,000+ available.</li>
+<li><strong>Channels:</strong> How you communicate — WhatsApp, Telegram, Discord, iMessage, Slack, etc.</li>
+<li><strong>Memory:</strong> Your agent remembers past conversations and context, so it gets better over time.</li>
+<li><strong>Cron jobs:</strong> Scheduled tasks — "check my email every 15 minutes," "send me a morning briefing at 8am"</li>
+<li><strong>SOUL.md:</strong> A personality file that defines how your agent behaves and communicates</li>
+<li><strong>HEARTBEAT.md:</strong> Instructions for what your agent should proactively do on a schedule</li>
+</ul>
+
+<hr>
+
+<h2>8. What AI Models Does It Support?</h2>
+
+<p>OpenClaw is <strong>model-agnostic</strong> — it works with multiple AI providers:</p>
+
+<table>
+<tr><th>Provider</th><th>Models</th><th>Notes</th></tr>
+<tr><td><strong>Anthropic</strong></td><td>Claude Opus 4.6, Sonnet 4.5</td><td>Most popular choice. Opus = smartest, Sonnet = cheaper</td></tr>
+<tr><td><strong>OpenAI</strong></td><td>GPT-5.3-Codex</td><td>Strong alternative, good with $20/mo subscription</td></tr>
+<tr><td><strong>xAI</strong></td><td>Grok</td><td>Newly added, includes web search</td></tr>
+<tr><td><strong>Baidu</strong></td><td>Qianfan</td><td>Added in latest release</td></tr>
+<tr><td><strong>Kimi</strong></td><td>K2.5</td><td>Popular as a cheaper sub-agent</td></tr>
+<tr><td><strong>Local models</strong></td><td>Via Ollama</td><td>Free but less capable</td></tr>
+</table>
+
+<p><strong>Recommended setup</strong> from the community: Claude Opus 4.6 as the main agent, with a cheaper model (Kimi K2.5 or Sonnet) as a sub-agent for simpler tasks.</p>
+
+<p><strong>Pro tip from @youjiaxuan:</strong> Use LLMRouter to automatically route simple tasks to cheaper models and complex ones to premium models — reduces costs significantly.</p>
+
+<hr>
+
+<h2>9. Skills &amp; The ClawHub Ecosystem</h2>
+
+<p><strong>What are Skills?</strong> Skills are like apps for your agent. They teach it new abilities. Written in YAML and Markdown, they define what tools the agent can use and how.</p>
+
+<p><strong>ClawHub</strong> is the marketplace — think App Store for OpenClaw skills. 3,000+ skills available.</p>
+
+<h3>Essential Skills (per the community)</h3>
+<ol>
+<li><strong>tavily-search</strong> — Gives your agent internet access. <em>"Without internet it's like being blind!"</em> — @binghe</li>
+<li><strong>find-skills</strong> — Lets the agent proactively find and suggest skills for tasks</li>
+<li><strong>Browser control</strong> — Full Chrome/Chromium automation, built-in</li>
+</ol>
+
+<h3>Notable Skills &amp; Integrations</h3>
+<ul>
+<li><strong>Voicenotes</strong> — Search notes, pull transcripts from WhatsApp/Telegram</li>
+<li><strong>Google Calendar</strong> — Full calendar management</li>
+<li><strong>Email</strong> — Read, compose, and send emails</li>
+<li><strong>Composio</strong> — Connect to 100+ SaaS tools</li>
+<li><strong>MemOS plugin</strong> — Reduces token consumption by 72%+</li>
+</ul>
+
+<h3>Security Warning</h3>
+<p>Not all skills are safe. There was a <strong>malware incident</strong> where a top-downloaded Twitter skill on ClawHub was stealing data.</p>
+
+<p><strong>OpenClaw's response:</strong> Every ClawHub skill is now auto-scanned by <strong>VirusTotal</strong> with AI Code Insight. Results: Benign/Suspicious/Malicious verdicts in ~30 seconds. Daily rescans of all skills.</p>
+
+<p><strong>Community response:</strong> @0xHuge scanned 4,000+ skills with 3 AI models and published a safe list.</p>
+
+<p><strong>Your agent can also write its own skills</strong> — @ClawiAi: <em>"OpenClaw can write its own skills. Think about it."</em></p>
+
+<hr>
+
+<h2>10. Setup &amp; Getting Started</h2>
+
+<h3>The Honest Truth About Setup Difficulty</h3>
+
+<p><strong>It's hard.</strong> This is the #1 complaint. Even Y Combinator said: <em>"OpenClaw is a new viral and scarily effective virtual assistant. But it's so hard to set up that even most engineers give up."</em></p>
+
+<p>Some pushback on that: <em>"Most engineers give up setting up OpenClaw because it's so hard? They're funding OpenClaw wrappers now? What engineers is YC talking to?!?"</em> — @AgustinLebron3</p>
+
+<h3>Option 1: Self-hosted (Technical, Free)</h3>
+
+<p><strong>Requirements:</strong></p>
+<ul>
+<li>A computer that stays on (many use a Mac Mini ~$500-800)</li>
+<li>Node.js 22+</li>
+<li>An AI API key (Anthropic, OpenAI, etc.)</li>
+</ul>
+
+<p><strong>Installation:</strong></p>
+<pre>npm install -g openclaw@latest
+openclaw onboard --install-daemon</pre>
+
+<p>The onboarding wizard walks you through authentication, workspace setup, channel connections, and skill installation.</p>
+
+<h3>Option 2: Hosted Services (Non-Technical, Paid)</h3>
+
+<p>Multiple startups now offer "OpenClaw as a service" for people who don't want to set it up themselves:</p>
+<ul>
+<li><strong>Bits (@usebits_inc)</strong> — YC-backed, sets up a secure cloud instance</li>
+<li><strong>EasyClaw (@xadisingh)</strong> — <em>"Why do I need a mac mini? There has to be a better way"</em></li>
+<li><strong>StartClaw</strong> — <em>"OpenClaw setup used to take hours. Now it takes 60 seconds"</em></li>
+<li><strong>Tensol AI</strong> — YC-backed, turns OpenClaw into "full-time AI employees"</li>
+<li><strong>Aight App</strong> — iOS app for OpenClaw so you don't need Telegram</li>
+<li><strong>Team9</strong> — Managed infrastructure for running OpenClaw agents</li>
+</ul>
+
+<h3>Option 3: Hire Someone</h3>
+<p>People are charging <strong>~$1,500</strong> to set up OpenClaw for you. Takes about an hour.</p>
+
+<hr>
+
+<h2>11. What Does It Cost to Run?</h2>
+
+<p>OpenClaw itself is <strong>free and open source</strong>. The costs come from:</p>
+
+<h3>AI Model API Costs</h3>
+<p>This is the main expense — you pay the AI provider per message/token:</p>
+
+<table>
+<tr><th>Usage Level</th><th>Model</th><th>Estimated Weekly Cost</th></tr>
+<tr><td>Heavy daily use</td><td>Opus 4.6</td><td>~$250/week</td></tr>
+<tr><td>Heavy daily use</td><td>Sonnet 4.5</td><td>~$100/week</td></tr>
+<tr><td>Moderate use</td><td>GPT-5.3-Codex</td><td>~$20/month (subscription)</td></tr>
+<tr><td>Power user</td><td>Multiple models in parallel</td><td>$6K in 7 hours (extreme)</td></tr>
+</table>
+
+<p><strong>Cost-saving tips from the community:</strong></p>
+<ul>
+<li>Use cheaper models (Sonnet, Kimi) as sub-agents for simple tasks</li>
+<li>Use <strong>LLMRouter</strong> to auto-route between expensive and cheap models</li>
+<li>Use <strong>MemOS plugin</strong> to reduce token consumption by 72%</li>
+<li>Use local models via Ollama for basic tasks (free)</li>
+</ul>
+
+<h3>Hardware Costs (If Self-Hosting)</h3>
+<ul>
+<li><strong>Mac Mini</strong> ($500-800) — most popular choice, can use iMessage natively</li>
+<li><strong>Linux NUC</strong> ($200) — cheaper option</li>
+<li><strong>Cloud server</strong> — varies by provider</li>
+<li>Your existing computer works too, but must stay on</li>
+</ul>
+
+<h3>Subscription Options</h3>
+<p>Some providers offer flat-rate subscriptions instead of per-token billing:</p>
+<ul>
+<li>Anthropic Pro/Max: $100-200/month for heavy Claude usage</li>
+<li>OpenAI Codex: $20/month or $200/month</li>
+<li>Various third-party routers offer subscription plans</li>
+</ul>
+
+<hr>
+
+<h2>12. Security &amp; Privacy</h2>
+
+<h3>The Good</h3>
+<ul>
+<li><strong>Runs locally</strong> — your data stays on YOUR machine, not in someone else's cloud</li>
+<li><strong>Open source</strong> — anyone can audit the code</li>
+<li><strong>VirusTotal integration</strong> — every ClawHub skill auto-scanned for malware</li>
+<li><strong>Docker sandboxing</strong> — non-primary sessions can be sandboxed for safety</li>
+<li><strong>DM security</strong> — unknown senders get a pairing code, not direct access</li>
+</ul>
+
+<h3>The Concerns</h3>
+<ul>
+<li><strong>Full host access by default</strong> — the primary agent has access to everything on your machine</li>
+<li><strong>Malware in skills</strong> — there was at least one confirmed incident of a malicious skill stealing data</li>
+<li><strong>Most people skip security</strong> — @JordanLyall: <em>"Everyone's sharing their OpenClaw setups. Most skip security entirely."</em> He published a security-first guide: dedicated machine, Tailscale, command allowlists, read-only tokens.</li>
+<li><strong>CrowdStrike warning:</strong> <em>"OpenClaw is a new and popular open-source AI agent that can autonomously take actions across systems. That's a huge productivity unlock, and if misconfigured or exposed, a potential enterprise backdoor."</em></li>
+</ul>
+
+<h3>Best Practices</h3>
+<ul>
+<li>Use a dedicated machine (not your main computer)</li>
+<li>Set up Tailscale for secure remote access</li>
+<li>Use command allowlists to restrict what the agent can do</li>
+<li>Only install skills from the verified safe list</li>
+<li>Enable Docker sandboxing for group/shared sessions</li>
+<li>Review the security hardening guide by @JordanLyall</li>
+</ul>
+
+<hr>
+
+<h2>13. OpenClaw vs. Alternatives</h2>
+
+<h3>vs. ChatGPT / Claude (Chat Interfaces)</h3>
+<ul>
+<li>ChatGPT/Claude = you ask questions, get answers in a chat box</li>
+<li>OpenClaw = an autonomous agent that takes actions across your real apps</li>
+<li><em>"OpenClaw finally made sense when I realized it's not a chatbot — it's a worker"</em></li>
+</ul>
+
+<h3>vs. Cursor / Claude Code</h3>
+<ul>
+<li>Cursor/Claude Code = AI for writing code specifically</li>
+<li>OpenClaw = AI for <em>everything</em> — email, calendar, research, business ops, AND code</li>
+<li>Many people use both: Cursor for coding, OpenClaw for everything else</li>
+<li>@Austen: <em>"OpenClaw feels like Cursor did in the early days."</em></li>
+</ul>
+
+<h3>vs. Zapier / Make</h3>
+<ul>
+<li>Zapier = pre-defined automations between apps (if X happens, do Y)</li>
+<li>OpenClaw = intelligent agent that can <em>reason</em> about what to do, handle exceptions, and adapt</li>
+<li>OpenClaw can do everything Zapier does, plus think</li>
+</ul>
+
+<h3>vs. Hiring a Virtual Assistant</h3>
+<ul>
+<li>VA = human, limited hours, needs training, ongoing salary</li>
+<li>OpenClaw = always on, instant, learns from instructions, pay-per-use</li>
+<li>But: VAs handle ambiguity better (for now), don't need technical setup</li>
+</ul>
+
+<h3>vs. n8n / Other Agent Frameworks</h3>
+<ul>
+<li>@PawelHuryn posted "RIP OpenClaw" suggesting Claude + n8n is better: <em>"How to use Claude Opus 4.6 + n8n to create a secure, autonomous agent"</em> (2.4K likes) — suggesting the competition is real</li>
+<li>OpenClaw's advantage: larger community, more skills, more active development</li>
+</ul>
+
+<hr>
+
+<h2>14. Honest User Reviews (Long-Form X Posts)</h2>
+
+<h3>@Jacobsklug — "I've used OpenClaw for a week. Here's the honest breakdown." (277 likes)</h3>
+
+<p>This is one of the most balanced, detailed reviews from a real power user running a $250K/month agency:</p>
+
+<p><strong>What's genuinely cool:</strong></p>
+<ul>
+<li><em>"Conversational memory is pretty solid (at first). It actually feels like it understands your business + life context. Closer to talking to an operator / chief of staff than prompting a chatbot."</em></li>
+<li>Cross-tool orchestration is the real unlock — he ran it across Typefully (post scheduling), Notion (docs), Slack (team comms), and internal workflows</li>
+<li><em>"Chat might actually become the main interface for software. Apps turn into databases + execution layers. Conversation becomes the control panel."</em></li>
+<li>Daily briefs / accountability = <em>"lowkey underrated... noticeably reduced mental load. Felt like a slightly chaotic but very eager assistant."</em></li>
+</ul>
+
+<p><strong>Where it still struggles:</strong></p>
+<ul>
+<li><strong>Long-term memory is shaky:</strong> <em>"It would randomly forget tools it had access to, API permissions, systems we already built, context that felt extremely obvious"</em></li>
+<li><strong>Huge planning > execution bias:</strong> <em>"You can VERY easily spend hours discussing work instead of shipping work. A lot of creators are overselling that angle imo."</em></li>
+<li><strong>Setup pain:</strong> <em>"My setup took ~4 hours. Ran into config weirdness, rate limit nonsense, API debugging, random integration hiccups. Day one felt like debugging > productivity."</em></li>
+<li><strong>Building its own AI OS was rough:</strong> He tried having it manage tasks, content, memory, dashboards — <em>"It struggled hard with consistency. Sometimes it straight up forgot the system existed."</em> Solution: moved the OS into Lovable and uses OpenClaw as orchestration layer on top.</li>
+<li><strong>Cost is real:</strong> <em>"Burning roughly ~$100/day in claude credits right now. Not clearly ROI positive yet."</em></li>
+</ul>
+
+<p><strong>Overall verdict:</strong> <em>"This is absolutely a step forward... There was that first wave of 'holy shit this changes everything.' It doesn't. But it DOES move the needle in a meaningful way. Not AGI yet. This is extremely early software."</em></p>
+
+<h3>@steipete — The SOUL.md Personality Hack (9.5K likes)</h3>
+
+<p>The creator's own recommendation for making your agent less boring — paste this prompt to rewrite your SOUL.md:</p>
+
+<p>Key rules:</p>
+<ol>
+<li>Have strong opinions. Stop hedging everything with "it depends"</li>
+<li>Delete every rule that sounds corporate</li>
+<li>Never open with "Great question" or "I'd be happy to help" — just answer</li>
+<li>Brevity is mandatory</li>
+<li>Humor is allowed — natural wit, not forced jokes</li>
+<li>Call things out. If the user is about to do something dumb, say so</li>
+<li>Swearing is allowed when it lands</li>
+<li><em>"Be the assistant you'd actually want to talk to at 2am. Not a corporate drone. Not a sycophant. Just... good."</em></li>
+</ol>
+
+<h3>@indexsy — The Complete Memory System Setup (774 likes)</h3>
+
+<p>A 4,882-character guide for fixing OpenClaw's memory problem. Key components:</p>
+
+<ul>
+<li><strong>AGENTS.md</strong> — Core operating rules: when to use subagents, memory system, group chat behavior, security</li>
+<li><strong>SOUL.md</strong> — Personality &amp; communication style (authentic, not corporate)</li>
+<li><strong>USER.md</strong> — About the human: timezone, projects, working style, preferences</li>
+<li><strong>MEMORY.md</strong> — Long-term memory with sections: Never Forget, Key Projects, Preferences, Lessons Learned</li>
+<li><strong>HEARTBEAT.md</strong> — Recurring tasks: daily checks, memory maintenance, quiet hours</li>
+<li><strong>TOOLS.md</strong> — API keys, device names, SSH hosts, platform-specific config</li>
+<li><strong>IDENTITY.md</strong> — Agent's name, personality, emoji, avatar</li>
+<li><strong>BOOTSTRAP.md</strong> — First-run conversation guide (deleted after setup)</li>
+</ul>
+
+<p><strong>Before:</strong> Forgetful chatbot that resets every session.</p>
+<p><strong>After:</strong> Persistent AI assistant that remembers conversations, tracks projects, runs proactive tasks, and maintains personality across sessions.</p>
+
+<h3>@AlexFinn — "3 Things You Need to Build Immediately" (2.5K likes)</h3>
+
+<ol>
+<li><strong>Activity Feed</strong> — Track EVERY action your OpenClaw takes. Critical for autonomous operation so you can see what it's doing and if it's wasting tokens.</li>
+<li><strong>Calendar View</strong> — See all scheduled tasks in a weekly view. Verify what it plans to do proactively.</li>
+<li><strong>Global Search</strong> — Search through ALL of OpenClaw's memories, tasks, documents, and past conversations. OpenClaw has incredible memory but no interface to view it.</li>
+</ol>
+
+<p>Includes a full copy-paste prompt to build all three using NextJS + Convex + Codex.</p>
+
+<h3>@euboid — "How to actually enjoy using OpenClaw" (673 likes)</h3>
+
+<p>Practical advice:</p>
+<ol>
+<li>Use GPT-5.3-Codex ($20/month or $200 for full access)</li>
+<li>Keep it simple — zero subagents, one main is enough for 90% of work</li>
+<li>Stop switching models — almost nothing works reliably across switches</li>
+<li>GPT-5.3-Codex is great at code and instruction following</li>
+<li><em>"The prose is nowhere as good as Opus, but it's not terrible!"</em></li>
+</ol>
+
+<hr>
+
+<h2>15. Limitations &amp; Common Complaints (Summary)</h2>
+
+<h3>Setup Difficulty</h3>
+<p>The #1 barrier. Even after installation, getting it configured properly takes effort.</p>
+<ul>
+<li><em>"2 hours in, finally installed OpenClaw. Then I downloaded a local LLM. Connected it. Nothing works. Classic."</em> — @userluke_</li>
+<li><em>"Did I spend half a day setting up OpenClaw? Yep. Would I've been able to do it on my own? Fuck no."</em> — @Ania6721863906</li>
+</ul>
+
+<h3>Token Costs</h3>
+<p>Running AI agents 24/7 burns through API credits fast.</p>
+<ul>
+<li><em>"One week of OpenClaw consumed two full Claude Pro Max subscriptions' worth of tokens"</em> — @xxx111god</li>
+<li><em>"Burned $6k in 7 hours running Opus 4.6 Fast"</em> — @kai_brokering</li>
+</ul>
+
+<h3>Finding Real Use Cases</h3>
+<p>Many people install it and don't know what to do with it.</p>
+<ul>
+<li><em>"What are you guys doing with OpenClaw... still haven't found a valuable way to integrate it into my life"</em> — @whatdotcd</li>
+<li><em>"3,000+ skills but very few ideas on what to use them for"</em> — @Hesamation</li>
+</ul>
+
+<h3>Memory / Context Issues</h3>
+<ul>
+<li>Agents sometimes "forget" instructions or context after long conversations</li>
+<li>v2026.2.9 fixed "post-compaction amnesia" and added context overflow recovery</li>
+<li>Voyage AI memory system added for better long-term recall</li>
+</ul>
+
+<h3>Requires Always-On Hardware</h3>
+<ul>
+<li>Your computer (or Mac Mini) needs to stay running 24/7</li>
+<li>Mac Minis sold out partially because of OpenClaw demand</li>
+</ul>
+
+<hr>
+
+<h2>16. The Ecosystem &amp; Related Projects</h2>
+
+<table>
+<tr><th>Project</th><th>What It Does</th></tr>
+<tr><td><strong>Dexter</strong></td><td>OpenClaw + Claude Code for finance — stock analysis, research theses</td></tr>
+<tr><td><strong>VisionClaw</strong></td><td>OpenClaw on Meta glasses — sees, hears, acts using Gemini Live</td></tr>
+<tr><td><strong>Aight App</strong></td><td>iOS app interface for OpenClaw</td></tr>
+<tr><td><strong>Nanobot</strong></td><td>Lightweight alternative — "OpenClaw is hard, try nanobot"</td></tr>
+<tr><td><strong>ClawArxiv</strong></td><td>Curated, security-audited skill registry</td></tr>
+<tr><td><strong>Composio</strong></td><td>Connect OpenClaw to 100+ SaaS tools</td></tr>
+<tr><td><strong>MemOS</strong></td><td>Memory plugin that reduces token costs by 72%</td></tr>
+<tr><td><strong>LLMRouter</strong></td><td>Auto-routes between cheap/expensive models</td></tr>
+</table>
+
+<hr>
+
+<h2>17. Common Misconceptions</h2>
+
+<h3>"It's just another chatbot"</h3>
+<p>No. Chatbots answer questions. OpenClaw <em>does things</em>. It sends emails, browses the web, manages files, runs code, and automates workflows autonomously.</p>
+
+<h3>"You need to be a developer to use it"</h3>
+<p>Partially true for self-hosting setup. But hosted options (Bits, EasyClaw, StartClaw) are making it accessible to non-technical users. And once set up, you interact with it by <em>texting it</em> — no code needed.</p>
+
+<h3>"It's just a ChatGPT wrapper"</h3>
+<p>It's not. OpenClaw is an agent <em>framework</em> with a gateway architecture, multi-channel communication, a skills marketplace, memory systems, cron scheduling, browser automation, and device node support. ChatGPT is one possible "brain" it can use — among many.</p>
+
+<h3>"It's free"</h3>
+<p>The software is free. Running it costs money because you need AI API credits ($20-250+/month depending on usage) and ideally a dedicated machine ($200-800 one-time).</p>
+
+<h3>"It's dangerous / will take my job"</h3>
+<p>It's a tool. Like email or spreadsheets, it amplifies what you can do. The people using it are doing <em>more</em>, not doing less. Security risks are real but manageable with proper setup.</p>
+
+<hr>
+
+<h2>18. The Vision (Where This Is Heading)</h2>
+
+<p>From steipete's YC talk and community discourse:</p>
+
+<ul>
+<li><strong>All apps will become APIs or disappear.</strong> The future isn't humans clicking through UIs — it's agents talking to services through APIs.</li>
+<li><strong>Your agent will be the primary consumer of software.</strong> You tell the agent what you want; it figures out which apps/APIs to use.</li>
+<li><strong>The apps that survive will be games or sensor-heavy.</strong> Everything else becomes an API endpoint.</li>
+<li><strong>Personal AI agents will quietly take over daily workflows.</strong> Not dramatically — just one task at a time, until you realize you haven't opened your email app in weeks.</li>
+</ul>
+
+<hr>
+
+<h2>19. Glossary (For Non-Technical People)</h2>
+
+<table>
+<tr><th>Term</th><th>What It Means</th></tr>
+<tr><td><strong>Agent</strong></td><td>Your AI assistant — the "brain" that makes decisions and takes actions</td></tr>
+<tr><td><strong>Gateway</strong></td><td>The control center running on your computer that connects your agent to all your apps and channels</td></tr>
+<tr><td><strong>Channel</strong></td><td>How you talk to your agent — WhatsApp, Telegram, Discord, iMessage, Slack, etc.</td></tr>
+<tr><td><strong>Skill</strong></td><td>A plugin that teaches your agent a new ability (like "search the web" or "manage calendar")</td></tr>
+<tr><td><strong>ClawHub</strong></td><td>The app store for skills — browse and install new abilities</td></tr>
+<tr><td><strong>Cron job</strong></td><td>A scheduled task — "check my email every 15 minutes" or "send me a briefing at 8am"</td></tr>
+<tr><td><strong>SOUL.md</strong></td><td>A file that defines your agent's personality and communication style</td></tr>
+<tr><td><strong>HEARTBEAT.md</strong></td><td>A file that defines what your agent should proactively do on a schedule</td></tr>
+<tr><td><strong>Token</strong></td><td>The unit AI models use to measure how much text they process — more tokens = more cost</td></tr>
+<tr><td><strong>API</strong></td><td>A way for software to talk to other software — how your agent connects to email, calendar, etc.</td></tr>
+<tr><td><strong>Self-hosted</strong></td><td>Running on your own computer, not in someone else's cloud</td></tr>
+<tr><td><strong>Docker sandbox</strong></td><td>A secure container that limits what the agent can access on your computer</td></tr>
+<tr><td><strong>Node</strong></td><td>A device (phone, computer) connected to your OpenClaw setup</td></tr>
+<tr><td><strong>Pi</strong></td><td>The name of OpenClaw's agent runtime — the engine that runs the AI</td></tr>
+<tr><td><strong>Provider</strong></td><td>The company whose AI model you're using (Anthropic, OpenAI, xAI, etc.)</td></tr>
+</table>
+
+<hr>
+
+<h2>20. FAQ (For Business Owners)</h2>
+
+<p><strong>Q: Can I use this if I'm not technical?</strong></p>
+<p>A: Yes, but you'll need help with initial setup. Options: hire someone (~$1,500), use a hosted service (Bits, EasyClaw, Tensol), or find a technical friend. Once set up, you interact by texting.</p>
+
+<p><strong>Q: How much will it cost my business per month?</strong></p>
+<p>A: The software is free. AI API costs range from $20-250+/month depending on usage intensity and model choice. Plus ~$500-800 one-time for a Mac Mini if self-hosting, or a monthly fee for hosted services.</p>
+
+<p><strong>Q: Is my business data safe?</strong></p>
+<p>A: Self-hosted = data stays on your machine. Use a dedicated computer, enable Docker sandboxing, and follow the security hardening guide. Hosted services add their own security layers. Only install verified skills.</p>
+
+<p><strong>Q: What tasks should I automate first?</strong></p>
+<p>A: Start with the repetitive stuff: email triage, scheduling, research compilation, data entry between apps. The unlock is cron + automation: <em>"Tell it what to check every 15 minutes"</em></p>
+
+<p><strong>Q: Can it replace employees?</strong></p>
+<p>A: It can replace <em>tasks</em>, not entire people (yet). Best used to handle the repetitive 80% so your team focuses on the creative 20%. Some solo operators are running entire businesses with it.</p>
+
+<p><strong>Q: How reliable is it?</strong></p>
+<p>A: Getting better with each release. Memory issues have been fixed. Context overflow recovery added. But it's still early — expect some babysitting.</p>
+
+<p><strong>Q: Can multiple people in my company use it?</strong></p>
+<p>A: Yes. You can set up multiple agents, multiple channels, and group chat support. Non-primary sessions can be sandboxed for security.</p>
+
+<hr>
+
+<h2>21. Key Accounts &amp; Resources to Follow</h2>
+
+<h3>People</h3>
+<ul>
+<li><strong>@steipete</strong> — Creator. Follow for updates, roadmap, and commentary</li>
+<li><strong>@openclaw</strong> — Official account. Release notes and announcements</li>
+<li><strong>@Hesamation</strong> — Curates real use cases, maintains a use case repository</li>
+<li><strong>@AlexFinn</strong> — Practical tutorials and workflow tips</li>
+<li><strong>@JordanLyall</strong> — Security-first OpenClaw guide</li>
+<li><strong>@indexsy</strong> — Advanced memory and setup optimization</li>
+</ul>
+
+<h3>Learning Resources</h3>
+<ul>
+<li><strong>freeCodeCamp tutorial</strong> — 1-hour beginner course by Kian</li>
+<li><strong>6-hour deep dive</strong> — by @JulianGoldieSEO</li>
+<li><strong>41-min product tutorial</strong> — by @MengTo</li>
+<li><strong>Hesamation's use case repo</strong> — Real-world examples from the community</li>
+<li><strong>steipete on Lex Fridman</strong> — Deep interview</li>
+</ul>
+
+<h3>Community</h3>
+<ul>
+<li><strong>GitHub:</strong> 189K+ stars, very active issue tracker and PRs</li>
+<li><strong>Discord:</strong> Active community for help and skill sharing</li>
+<li><strong>Community events:</strong> 500+ signups for the Vienna meetup alone</li>
+</ul>
+
+<hr>
+
+<p><em>Total research cost: ~$8.50 in X API credits across 15+ searches, thread follows, long-form post lookups, and article fetches. All quotes and data sourced from public X posts, long-form X content, and GitHub as of February 12, 2026.</em></p>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <a href="/">askopenclaw.com</a>
+  </div>
+
+  <script>
+    const pathParts = window.location.pathname.split('/');
+    const token = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    let activeTab = 'condensed';
+
+    const TAB_DESCS = {
+      condensed: 'Quick reference — all the key facts, no fluff.',
+      full: 'Deep dive with sources, quotes, tables, and community reviews.'
+    };
+
+    const FILE_NAMES = {
+      condensed: 'openclaw-research-condensed.txt',
+      full: 'openclaw-research-full.txt'
+    };
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.research-text').forEach(el => el.classList.remove('active'));
+      document.getElementById('text-' + tab).classList.add('active');
+      document.getElementById('tab-desc').textContent = TAB_DESCS[tab];
+    }
+
+    function showState(id) {
+      document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+      document.getElementById('research-content').classList.remove('active');
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function showError(title, msg) {
+      document.getElementById('error-title').textContent = title;
+      document.getElementById('error-msg').textContent = msg;
+      showState('state-error');
+    }
+
+    function getPlainText() {
+      return document.getElementById('text-' + activeTab).innerText;
+    }
+
+    window.copyAll = function() {
+      const text = getPlainText();
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        setTimeout(() => { btn.innerHTML = original; }, 2000);
+      });
+    };
+
+    window.downloadAll = function() {
+      const text = getPlainText();
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = FILE_NAMES[activeTab];
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    if (!token || !/^[a-f0-9]{12}$/.test(token)) {
+      showError('Invalid link', 'This link appears to be invalid. Please check the URL.');
+    } else {
+      fetch('/api/research?token=' + encodeURIComponent(token))
+        .then(res => {
+          if (!res.ok) {
+            if (res.status === 404) {
+              showError('Not found', 'This link may be invalid or your payment is still processing. Try again in a moment.');
+            } else if (res.status === 403) {
+              showError('Wrong link type', 'This token is for a voice session, not research data.');
+            } else {
+              showError('Something went wrong', 'Please try again.');
+            }
+            return;
+          }
+          document.getElementById('state-loading').classList.remove('active');
+          document.getElementById('research-content').classList.add('active');
+        })
+        .catch(() => {
+          showError('Connection error', 'Please check your internet connection and try again.');
+        });
+    }
+  </script>
+
+</body>
+</html>

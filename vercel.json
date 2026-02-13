@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/talk/:token", "destination": "/talk.html" }
+    { "source": "/talk/:token", "destination": "/talk.html" },
+    { "source": "/research/:token", "destination": "/research.html" }
   ]
 }

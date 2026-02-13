@@ -664,9 +664,9 @@
 
     .pricing-cards {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
-      max-width: 640px;
+      max-width: 960px;
       margin: 0 auto;
     }
 
@@ -687,6 +687,29 @@
       background: linear-gradient(135deg, var(--primary) 0%, #d44f3c 100%);
       color: #fff;
       box-shadow: 0 8px 40px var(--primary-glow);
+    }
+
+    .pricing-card.research {
+      background: var(--surface);
+      border: 2px solid var(--primary);
+    }
+
+    .pricing-card.research .pricing-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .pricing-card.research .pricing-features li::before {
+      color: var(--primary);
+    }
+
+    .pricing-card.research .pricing-btn {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .pricing-card.research .pricing-btn:hover {
+      background: var(--primary);
+      color: #fff;
     }
 
     .pricing-badge {
@@ -1086,6 +1109,10 @@
         order: -1;
       }
 
+      .pricing-card.research {
+        order: 0;
+      }
+
       .voice-stage {
         padding: 36px 20px;
       }
@@ -1127,7 +1154,7 @@
     <h1>The internet's deepest OpenClaw&nbsp;expert</h1>
     <p class="hero-subtitle">
       Trained on the best power user blogs, Hacker News threads, Reddit deep-dives, and X discourse.
-      Ask it anything&nbsp;&mdash; especially how OpenClaw fits&nbsp;your&nbsp;business.
+      Ask it anything.
     </p>
     <button class="cta-btn" id="start-btn" aria-label="Talk to the OpenClaw expert">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
@@ -1194,6 +1221,10 @@
         <p style="margin-bottom: 16px;">OpenClaw is a free, open-source AI assistant that runs on your own infrastructure and connects to the messaging platforms your team already uses &mdash; Slack, WhatsApp, Telegram, Discord, Teams, and more. Created by Peter Steinberger as a weekend project in November 2025, it exploded to 100,000+ GitHub stars and became one of the fastest-growing open-source projects in history.</p>
         <p style="margin-bottom: 16px;">Unlike ChatGPT or Microsoft Copilot, you own the deployment. Your data never leaves your servers. You choose the AI model (Claude, ChatGPT, or others), customize behavior with a growing ecosystem of skills via ClawHub, and pay only for the AI provider &mdash; not per-seat licensing fees.</p>
         <p>The question is no longer <em>what</em> OpenClaw is. It's whether it's the right fit for <em>your</em> business &mdash; and that's exactly what our expert is here to help you figure out.</p>
+        <blockquote style="margin-top: 28px; padding: 20px 24px; background: var(--bg-warm); border-left: 3px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text);">
+          &ldquo;Just imagine you have a secretary in your pocket that also has access to your computer. That&rsquo;s it. What would you ask a secretary to do? Ask your OpenClaw to do.&rdquo;
+          <span style="display: block; margin-top: 10px; font-style: normal; font-size: 0.95rem; color: var(--text-muted);">&mdash; <a href="https://x.com/jjpcodes/status/2021070417503588489" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: none;">@jjpcodes</a>, OpenClaw contributor</span>
+        </blockquote>
       </div>
     </div>
   </section>
@@ -1262,7 +1293,20 @@
             <li>Split across multiple sessions</li>
             <li>Your own permanent link</li>
           </ul>
-          <button class="pricing-btn" id="pricing-pay-btn" onclick="startCheckout()">Get expert access</button>
+          <button class="pricing-btn" id="pricing-pay-btn" onclick="startCheckout('voice')">Get expert access</button>
+        </div>
+
+        <div class="pricing-card research reveal reveal-delay-3">
+          <span class="pricing-badge">DIY</span>
+          <h3>Raw research data</h3>
+          <div class="pricing-price">€3.99</div>
+          <div class="pricing-period">One-time payment</div>
+          <ul class="pricing-features">
+            <li>Full knowledge base as text</li>
+            <li>Copy &amp; use with your own AI</li>
+            <li>Instant access, no expiry</li>
+          </ul>
+          <button class="pricing-btn" id="pricing-research-btn" onclick="startCheckout('research')">Get the research</button>
         </div>
       </div>
     </div>
@@ -1479,7 +1523,7 @@
       <span class="lobster" aria-hidden="true">🦞</span>
       <h2 id="time-up-heading">Need more time with the expert?</h2>
       <p>90 seconds wasn't enough. Get 20 minutes of deep consultation &mdash; deployment strategies, business use cases, security trade-offs, the works.</p>
-      <button class="cta-btn" id="time-up-pay-btn" onclick="startCheckout()">
+      <button class="cta-btn" id="time-up-pay-btn" onclick="startCheckout('voice')">
         Unlock for €8
       </button>
       <button class="time-up-dismiss" id="time-up-dismiss">No thanks, maybe later</button>
@@ -1690,14 +1734,16 @@
 
     // ===== STRIPE CHECKOUT =====
     // Exposed globally for onclick handlers in HTML
-    window.startCheckout = async function() {
+    window.startCheckout = async function(type) {
+      type = type || 'voice';
+      const btnId = type === 'research' ? 'pricing-research-btn' : 'pricing-pay-btn';
       try {
-        const btn = document.getElementById('pricing-pay-btn');
+        const btn = document.getElementById(btnId);
         const originalText = btn.textContent;
         btn.textContent = 'Redirecting...';
         btn.disabled = true;
 
-        const res = await fetch('/api/checkout', { method: 'POST' });
+        const res = await fetch('/api/checkout?type=' + type, { method: 'POST' });
         const data = await res.json();
 
         if (data.url) {

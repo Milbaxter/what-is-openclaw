@@ -252,6 +252,7 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+    const type = params.get('type') || 'voice';
     const contentEl = document.getElementById('content');
 
     if (!token) {
@@ -261,6 +262,34 @@
         <p>No session token found. If you just completed a payment, please check your email or contact support.</p>
         <div class="home-link"><a href="/">Back to homepage</a></div>
       `;
+    } else if (type === 'research') {
+      const researchUrl = window.location.origin + '/research/' + token;
+
+      setTimeout(() => {
+        contentEl.innerHTML = `
+          <div class="icon">&#129438;</div>
+          <h1>You're in!</h1>
+          <p>Your research data is ready. Use this link anytime &mdash; it never expires.</p>
+          <div class="link-box">
+            <a href="${researchUrl}" id="research-link">${researchUrl}</a>
+          </div>
+          <button class="copy-btn" id="copy-btn" onclick="copyLink()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy link
+          </button>
+          <br>
+          <a href="${researchUrl}" class="start-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            View research data
+          </a>
+          <ul class="tips">
+            <li>Bookmark this link &mdash; it's yours forever</li>
+            <li>Copy the text and paste into any AI agent</li>
+            <li>Works on any device</li>
+          </ul>
+          <div class="home-link"><a href="/">Back to homepage</a></div>
+        `;
+      }, 1500);
     } else {
       const talkUrl = window.location.origin + '/talk/' + token;
 
@@ -293,8 +322,10 @@
     }
 
     function copyLink() {
-      const talkUrl = window.location.origin + '/talk/' + token;
-      navigator.clipboard.writeText(talkUrl).then(() => {
+      const url = type === 'research'
+        ? window.location.origin + '/research/' + token
+        : window.location.origin + '/talk/' + token;
+      navigator.clipboard.writeText(url).then(() => {
         const btn = document.getElementById('copy-btn');
         btn.innerHTML = `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
